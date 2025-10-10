@@ -1,0 +1,118 @@
+:root {
+    --red: #dd2834;
+    --blue: #102c5c;
+    --text-grey: #585858;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--red);
+    color: white;
+    font-family: stratos, sans-serif;
+    margin: 57px 0 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 57px;
+    background-color: white;
+    padding: 10px 30px;
+    display: flex;
+    align-items: baseline;
+    gap: 15px;
+}
+header h3 {
+    color: var(--red);
+    margin: 0;
+    font-size: 21px;
+}
+header a {
+    color: var(--blue);
+    text-decoration: none;
+}
+header a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: 680px;
+    padding: 0 15px;
+}
+
+h1, h2, h3 {
+    font-weight: 400;
+    text-align: center;
+}
+
+h1 {
+    font-size: 50px;
+}
+h2 {
+    font-size: 40px;
+}
+h3 {
+    font-size: 30px;
+}
+
+.m-no-top {
+    margin-top: 0;
+}
+.m-no-bottom {
+    margin-bottom: 0;
+}
+
+p {
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 27px;
+    color: var(--text-grey);
+}
+
+.card {
+    background-color: white;
+    width: 100%;
+    border-radius: 5px;
+    margin: 30px 0;
+    padding: 30px;
+}
+.card :first-child {
+    margin-top: 0;
+}
+.card :last-child {
+    margin-bottom: 0;
+}
+.card input[type=text] {
+    padding: 8px 10px;
+    font-size: 17px;
+    width: 300px;
+    margin: 1.5em auto;
+    display: block;
+    color: var(--text-grey);
+    outline: var(--text-grey);
+}
+.card input[type=submit] {
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 17px;
+    width: 300px;
+    margin: 1.5em auto;
+    display: block;
+    color: white;
+    background-color: var(--red);
+    border: 1px solid var(--red);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.card input[type=submit]:hover {
+    background: white;
+    color: var(--red);
+}

@@ -17,7 +17,7 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     "junior_rankings",
-    "django_object_actions",
+    "extranet",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -59,7 +59,10 @@ WSGI_APPLICATION = "junior_rankings.wsgi.application"
 
 
 # Database
-DATABASES = {"default": dj_database_url.config(default="postgres://localhost/junior_rankings")}
+DATABASES = {
+    "default": dj_database_url.config(default="postgres://localhost/junior_rankings"),
+    # "agb": dj_database_url.config(env="AGB_DATABASE_URL", default="postgres://localhost/agb_junior_rankings"),
+}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
