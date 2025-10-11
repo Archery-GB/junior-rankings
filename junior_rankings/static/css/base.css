@@ -51,7 +51,6 @@ h1, h2, h3 {
     font-weight: 400;
     text-align: center;
 }
-
 h1 {
     font-size: 50px;
 }
@@ -61,6 +60,18 @@ h2 {
 h3 {
     font-size: 30px;
 }
+h4 {
+    font-weight: 400;
+    margin: 1em 0 0.5em;
+    font-size: 21px;
+}
+h5 {
+    font-weight: 400;
+    font-size: 17px;
+    margin: 1em 0 0.5em;
+    color: var(--red);
+}
+
 
 .m-no-top {
     margin-top: 0;
@@ -71,9 +82,51 @@ h3 {
 
 p {
     font-weight: 400;
-    font-size: 17px;
+    font-size: 15px;
     line-height: 27px;
-    color: var(--text-grey);
+    margin: 0.5em 0;
+}
+p strong {
+    font-weight: 600;
+    color: var(--blue);
+}
+.help {
+    font-style: italic;
+    font-size: 15px;
+    opacity: 0.7;
+}
+
+a {
+    color: red;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+dl {
+    font-size: 15px;
+    display: flex;
+    gap: 5%;
+    flex-wrap: wrap;
+    line-height: 27px;
+}
+dt {
+    flex-basis: 35%;
+}
+dt::after {
+    content: ":";
+}
+dd {
+    flex-basis: 60%;
+    color: var(--blue);
+    margin: 0;
+}
+
+hr {
+    margin: 1em 0;
+    border: none;
+    border-top: 1px solid var(--text-grey);
 }
 
 .card {
@@ -82,6 +135,7 @@ p {
     border-radius: 5px;
     margin: 30px 0;
     padding: 30px;
+    color: var(--text-grey);
 }
 .card :first-child {
     margin-top: 0;
@@ -89,16 +143,25 @@ p {
 .card :last-child {
     margin-bottom: 0;
 }
+.card label {
+    font-size: 17px;
+    margin: 0.5em 0;
+    display: block;
+    color: var(--blue);
+    font-weight: 400;
+}
 .card input[type=text] {
+    font-family: stratos, sans-serif;
     padding: 8px 10px;
     font-size: 17px;
-    width: 300px;
-    margin: 1.5em auto;
+    width: 100%;
+    margin: 0;
     display: block;
     color: var(--text-grey);
     outline: var(--text-grey);
 }
 .card input[type=submit] {
+    font-family: stratos, sans-serif;
     border-radius: 4px;
     padding: 8px 10px;
     font-size: 17px;
@@ -109,10 +172,23 @@ p {
     background-color: var(--red);
     border: 1px solid var(--red);
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 400;
     transition: all 0.3s ease;
 }
 .card input[type=submit]:hover {
     background: white;
     color: var(--red);
+}
+.card select {
+    font-size: 17px;
+    font-family: stratos, sans-serif;
+    color: var(--text-grey);
+    border: 1px solid var(--text-grey);
+    border-radius: 4px;
+    padding: 8px 10px;
+    width: 100%;
+}
+.card input.standout {
+    margin: 1.5em auto;
+    max-width: 300px;
 }
