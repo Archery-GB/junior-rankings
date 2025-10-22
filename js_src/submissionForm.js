@@ -16,41 +16,59 @@ const Card = ({ children }) => {
 
 const Intro = ({ onComplete }) => {
     const [agbNo, setAgbNo] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const submit = (e) => {
         e.preventDefault();
-        onComplete({ agbNo });
+        setLoading(true);
+        var url = new URL('/api/athlete-details/', window.location.href);
+        var params = { agb_number: agbNo };
+        url.search = new URLSearchParams(params).toString();
+        fetch(url).then((response) => response.json()).then((data) => {
+            setLoading(false);
+            if (data.error) {
+                console.error(data.error);
+                setError({ agbNo });
+                return;
+            }
+            onComplete({ athlete: data });
+        });
     };
+
+    var submitLabel = "Start";
+    if (loading) submitLabel = "Loading";
 
     return (
         <>
             <p>We are currently in the score submission phase. Please enter your Archery GB number below to start checking your scores.</p>
+            { error && <p className="error">We cannot find a junior archer for the membership number { error.agbNo }.</p> }
             <form onSubmit={ submit }>
                 <input type="number" className="standout" name="agb_number" placeholder="Archery GB Number" onChange={ (e) => setAgbNo(e.target.value) } />
-                <input disabled={ !agbNo } type="submit" value="Start" />
+                <input disabled={ !agbNo || loading } type="submit" value={ submitLabel }/>
             </form>
         </>
     );
 };
 
 
-const Step1 = ({ agbNo, onComplete }) => {
+const Step1 = ({ athlete, onComplete }) => {
     return (
         <>
             <h4>Step 1: Check your details</h4>
             <dl>
                 <dt>Archery GB Number</dt>
-                <dd>{ agbNo }</dd>
+                <dd>{ athlete.agbNo }</dd>
                 <dt>Name</dt>
-                <dd>Matilda Clayson</dd>
+                <dd>{ athlete.name }</dd>
                 <dt>Year of Birth</dt>
-                <dd>2010</dd>
+                <dd>{ athlete.year }</dd>
                 <dt>Gender</dt>
-                <dd>Female</dd>
+                <dd>{ athlete.gender }</dd>
                 <dt>Age class</dt>
-                <dd>U16</dd>
+                <dd>{ athlete.age }</dd>
                 <dt>Division</dt>
-                <dd>Recurve</dd>
+                <dd>{ athlete.division }</dd>
             </dl>
             <p className="help">Something not quite right? Please contact us.</p>
             <input type="submit" value="Confirm" onClick={ onComplete } />

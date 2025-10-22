@@ -40,6 +40,10 @@ class Athlete(models.Model):
     gender = GenderField()
 
     def __str__(self):
+        return self.name
+
+    @property
+    def name(self):
         return "%s %s" % (self.forename, self.surname)
 
 

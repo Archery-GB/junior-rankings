@@ -5,5 +5,6 @@ from . import views
 
 urlpatterns = [
     path("", views.Root.as_view(), name="root"),
+    path("api/athlete-details/", views.AthleteDetails.as_view(), name="athlete-details"),
     path("admin/", admin.site.urls),
 ]
