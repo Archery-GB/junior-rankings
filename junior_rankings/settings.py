@@ -17,7 +17,6 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     "junior_rankings",
-    "extranet",
     "webpack_loader",
     "django.contrib.admin",
     "django.contrib.auth",
