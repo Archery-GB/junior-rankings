@@ -70,19 +70,28 @@ class Event(models.Model):
 class Score(models.Model):
     athlete_season = models.ForeignKey(AthleteSeason, on_delete=models.PROTECT)
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
-    shot_round = RoundField(rounds=(
-        archeryutils.load_rounds.WA_outdoor
-        | archeryutils.load_rounds.AGB_outdoor_metric
-        | archeryutils.load_rounds.AGB_outdoor_imperial
-    ))
+    shot_round = RoundField(
+        rounds=(
+            archeryutils.load_rounds.WA_outdoor
+            | archeryutils.load_rounds.AGB_outdoor_metric
+            | archeryutils.load_rounds.AGB_outdoor_imperial
+        )
+    )
     score = models.PositiveIntegerField()
 
     def __str__(self):
-        return "%s shot %s on %s at %s" % (self.athlete_season.athlete, self.score, self.shot_round, self.score)
+        return "%s shot %s on %s at %s" % (
+            self.athlete_season.athlete,
+            self.score,
+            self.shot_round,
+            self.score,
+        )
+
 
 ###
 # One day, we delete everything below here because we have all scores digitally
 ##
+
 
 class Submission(models.Model):
     agb_number = models.CharField(max_length=256)
@@ -98,12 +107,15 @@ class Submission(models.Model):
     gender = GenderField()
     bowstyle = BowstyleField()
 
+
 class SubmissionScore(models.Model):
     submission = models.ForeignKey(Submission, on_delete=models.PROTECT)
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
-    shot_round = RoundField(rounds=(
-        archeryutils.load_rounds.WA_outdoor
-        | archeryutils.load_rounds.AGB_outdoor_metric
-        | archeryutils.load_rounds.AGB_outdoor_imperial
-    ))
+    shot_round = RoundField(
+        rounds=(
+            archeryutils.load_rounds.WA_outdoor
+            | archeryutils.load_rounds.AGB_outdoor_metric
+            | archeryutils.load_rounds.AGB_outdoor_imperial
+        )
+    )
     score = models.PositiveIntegerField()

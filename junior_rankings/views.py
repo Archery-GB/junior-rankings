@@ -9,6 +9,4 @@ class Root(TemplateView):
     template_name = "junior_rankings/root.html"
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            page_name="root", **kwargs
-        )
+        return super().get_context_data(page_name="root", **kwargs)

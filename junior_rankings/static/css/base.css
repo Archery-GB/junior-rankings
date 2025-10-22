@@ -99,6 +99,7 @@ p strong {
 a {
     color: red;
     text-decoration: none;
+    cursor: pointer;
 }
 a:hover {
     text-decoration: underline;
@@ -150,6 +151,7 @@ hr {
     color: var(--blue);
     font-weight: 400;
 }
+.card input[type=number],
 .card input[type=text] {
     font-family: stratos, sans-serif;
     padding: 8px 10px;
@@ -175,9 +177,16 @@ hr {
     font-weight: 400;
     transition: all 0.3s ease;
 }
+.card input[type=submit][disabled] {
+    background: var(--text-grey);
+}
 .card input[type=submit]:hover {
     background: white;
     color: var(--red);
+}
+.card input[type=submit][disabled]:hover {
+    background: var(--text-grey);
+    color: white;
 }
 .card select {
     font-size: 17px;
