@@ -1,7 +1,10 @@
+import math
+
 from django.core import validators
 from django.db import models
 
 import archeryutils
+from archeryutils.handicaps import handicap_from_score, HandicapAGB
 
 from archerydjango.fields import (
     AgeField,
@@ -90,6 +93,10 @@ class Score(models.Model):
             self.shot_round,
             self.score,
         )
+
+    @property
+    def handicap(self):
+        return math.ceil(handicap_from_score(self.score, self.shot_round, 'AGB'))
 
 
 ###

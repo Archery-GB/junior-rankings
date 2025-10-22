@@ -53,6 +53,26 @@ const Intro = ({ onComplete }) => {
 
 
 const Step1 = ({ athlete, onComplete }) => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const submit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+        var url = new URL('/api/athlete-scores/', window.location.href);
+        var params = { agb_number: athlete.agbNo };
+        url.search = new URLSearchParams(params).toString();
+        fetch(url).then((response) => response.json()).then((data) => {
+            setLoading(false);
+            if (data.error) {
+                console.error(data.error);
+                setError({ agbNo: athlete.agbNo });
+                return;
+            }
+            onComplete({ scores: data.scores });
+        });
+    };
+
     return (
         <>
             <h4>Step 1: Check your details</h4>
@@ -71,13 +91,42 @@ const Step1 = ({ athlete, onComplete }) => {
                 <dd>{ athlete.division }</dd>
             </dl>
             <p className="help">Something not quite right? Please contact us.</p>
-            <input type="submit" value="Confirm" onClick={ onComplete } />
+            <input type="submit" value="Confirm" onClick={ submit } />
         </>
     );
 };
 
 
-const Step2 = ({ onComplete }) => {
+const ScoreRow = ({ score }) => {
+    return (
+        <>
+            <h5>{ score.event }</h5>
+            <dl>
+                <dt>Date</dt>
+                <dd>{ new Date(score.date).toDateString() }</dd>
+                <dt>Round</dt>
+                <dd>{ score.round }</dd>
+                <dt>Score</dt>
+                <dd>{ score.score }</dd>
+                <dt>Handicap</dt>
+                <dd>{ score.handicap }</dd>
+            </dl>
+            <hr />
+        </>
+    );
+};
+
+
+const Step2 = ({ scores, onComplete }) => {
+    const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.eventId } />);
+
+    const hasThree = scores.length >= 3;
+
+    var bestHandicap = null;
+    if (hasThree) {
+        bestHandicap = scores.slice(0, 3).map((score) => score.handicap).reduce((a, b) => a+b);
+    }
+
     return (
         <>
             <h4>Step 2: Check scores automatically imported</h4>
@@ -88,44 +137,34 @@ const Step2 = ({ onComplete }) => {
             event, you can submit them on the next page.
             </p>
             <hr />
-            
-            <h5>Junior National Outdoor Championships Day 1</h5>
-            <dl>
-                <dt>Round</dt>
-                <dd>AGB 900 50</dd>
-                <dt>Score</dt>
-                <dd>816</dd>
-                <dt>Handicap</dt>
-                <dd>37</dd>
-            </dl>
 
-            <hr />
-            
-            <h5>Junior National Outdoor Championships Day 2</h5>
-            <dl>
-                <dt>Round</dt>
-                <dd>Windsor 50</dd>
-                <dt>Score</dt>
-                <dd>914</dd>
-                <dt>Handicap</dt>
-                <dd>42</dd>
-            </dl>
-            
-            <hr />
+            { scoreRows }
 
-            <h5>Best handicap total</h5>
-            <p>Your best three scores give an aggregate handicap of <strong>120</strong>.</p>
+            <h5>Ranking total</h5>
+            { bestHandicap &&
+                <p>Your best three scores give an aggregate handicap of <strong>{ bestHandicap }</strong>.</p> ||
+                <p>You require three qualifying scores to obtain a ranking. Please add some more.</p>
+            }
 
             <p className="help">Something not quite right? Please contact us.</p>
 
-            <input type="submit" value="Confirm scores" onClick={ () => onComplete({}, 4) } />
+            { bestHandicap && <input type="submit" value="Confirm scores" onClick={ () => onComplete({}, 4) } /> }
             <input type="submit" value="Add more scores" onClick={ onComplete } />
         </>
     );
 };
 
 
-const Step3 = ({ onComplete }) => {
+const Step3 = ({ scores, onComplete }) => {
+    const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.eventId } />);
+
+    const hasThree = scores.length >= 3;
+
+    var bestHandicap = null;
+    if (hasThree) {
+        bestHandicap = scores.slice(0, 3).map((score) => score.handicap).reduce((a, b) => a+b);
+    }
+
     return (
         <>
             <h4>Step 3: Add additional scores</h4>
@@ -142,7 +181,7 @@ const Step3 = ({ onComplete }) => {
             </select>
             <label>Round</label>
             <select>
-                <option>Windsor 500</option>
+                <option>Windsor 50</option>
             </select>
             <label>Score</label>
             <input type="text" value="896"/>
@@ -151,24 +190,17 @@ const Step3 = ({ onComplete }) => {
             <input type="submit" value="Add score" />
             <hr />
             <h4>Scores so far</h4>
-            <h5>Junior National Outdoor Championships Day 1</h5>
-            <dl>
-                <dt>Round</dt>
-                <dd>AGB 900 50</dd>
-                <dt>Score</dt>
-                <dd>816</dd>
-                <dt>Handicap</dt>
-                <dd>37</dd>
-            </dl>
-            <p>…</p>
-            <hr />
+            { scoreRows }
 
-            <h5>Best handicap total</h5>
-            <p>Your best three scores give an aggregate handicap of <strong>120</strong>.</p>
+            <h5>Ranking total</h5>
+            { bestHandicap &&
+                <p>Your best three scores give an aggregate handicap of <strong>{ bestHandicap }</strong>.</p> ||
+                <p>You require three qualifying scores to obtain a ranking. Please add some more.</p>
+            }
 
             <p className="help">Something not quite right? Please contact us.</p>
 
-            <input type="submit" value="Confirm scores" onClick={ onComplete } />
+            { bestHandicap && <input type="submit" value="Confirm scores" onClick={ onComplete } /> }
         </>
     );
 };
