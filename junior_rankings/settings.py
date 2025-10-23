@@ -10,6 +10,8 @@ DEBUG = not os.environ.get("PRODUCTION")
 SECRET_KEY = os.environ.get("SECRET_KEY", "this-secret-is-bad")
 ALLOWED_HOSTS = [
     "localhost",
+    "junior-rankings.archerygb.org",
+    "archerygb-junior-rankings-4a3f3b147588.herokuapp.com",
 ]
 
 
