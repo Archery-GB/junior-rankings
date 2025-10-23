@@ -79,7 +79,7 @@ class AvailableEvents(AthleteSeasonByAgbNo, View):
             return e.response
         events = Event.objects.exclude(score__athlete_season=athlete_season).order_by('date')
         return JsonResponse({
-            "scores": [{
+            "events": [{
                 "identifier": event.identifier,
                 "name": event.name,
                 "date": event.date,

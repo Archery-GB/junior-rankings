@@ -117,7 +117,10 @@ const ScoreRow = ({ score }) => {
 };
 
 
-const Step2 = ({ scores, onComplete }) => {
+const Step2 = ({ athlete, scores, onComplete }) => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
     const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.eventId } />);
 
     const hasThree = scores.length >= 3;
@@ -126,6 +129,23 @@ const Step2 = ({ scores, onComplete }) => {
     if (hasThree) {
         bestHandicap = scores.slice(0, 3).map((score) => score.handicap).reduce((a, b) => a+b);
     }
+
+    const onAddScores = (e) => {
+        e.preventDefault();
+        setLoading(true);
+        var url = new URL('/api/available-events/', window.location.href);
+        var params = { agb_number: athlete.agbNo };
+        url.search = new URLSearchParams(params).toString();
+        fetch(url).then((response) => response.json()).then((data) => {
+            setLoading(false);
+            if (data.error) {
+                console.error(data.error);
+                setError({ agbNo: athlete.agbNo });
+                return;
+            }
+            onComplete({ events: data.events });
+        });
+    };
 
     return (
         <>
@@ -149,13 +169,19 @@ const Step2 = ({ scores, onComplete }) => {
             <p className="help">Something not quite right? Please contact us.</p>
 
             { bestHandicap && <input type="submit" value="Confirm scores" onClick={ () => onComplete({}, 4) } /> }
-            <input type="submit" value="Add more scores" onClick={ onComplete } />
+            <input type="submit" value="Add more scores" onClick={ onAddScores } />
         </>
     );
 };
 
 
-const Step3 = ({ scores, onComplete }) => {
+const Step3 = ({ events, scores, onComplete }) => {
+    const [addedScores, setAddedScores] = useState([]);
+    const [currentEvent, setCurrentEvent] = useState("");
+    const [currentRound, setCurrentRound] = useState("");
+    const [currentScore, setCurrentScore] = useState("");
+    const [hcLoaded, setHcLoaded] = useState(false);
+
     const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.eventId } />);
 
     const hasThree = scores.length >= 3;
@@ -163,6 +189,34 @@ const Step3 = ({ scores, onComplete }) => {
     var bestHandicap = null;
     if (hasThree) {
         bestHandicap = scores.slice(0, 3).map((score) => score.handicap).reduce((a, b) => a+b);
+    }
+
+    const eventOptions = events.map((ev) => {
+        return <option value={ ev.identifier } key={ ev.identifier }>{ ev.name }</option>;
+    })
+    let roundOptions = null;
+
+    if (currentEvent) {
+        const ev = events.find((e) => e.identifier === currentEvent);
+        roundOptions = ev.rounds.map((r) => {
+            return <option value={ r.codename } key={ r.codename }>{ r.name }</option>;
+        })
+    }
+
+    const selectEvent = (e) => {
+        setCurrentEvent(e.target.value);
+        setCurrentRound("");
+        setCurrentScore("");
+        setHcLoaded(false);
+    }
+    const selectRound = (e) => {
+        setCurrentRound(e.target.value);
+        setCurrentScore("");
+        setHcLoaded(false);
+    }
+    const setScore = (e) => {
+        setCurrentScore(e.target.score);
+        setHcLoaded(false);
     }
 
     return (
@@ -176,18 +230,32 @@ const Step3 = ({ scores, onComplete }) => {
             <hr />
             <h4>Add a score</h4>
             <label>Event</label>
-            <select>
-                <option>SCAS Regional Championships</option>
+            <select value={ currentEvent } onChange={ selectEvent }>
+                <option>Select event…</option>
+                { eventOptions }
             </select>
-            <label>Round</label>
-            <select>
-                <option>Windsor 50</option>
-            </select>
-            <label>Score</label>
-            <input type="text" value="896"/>
-            <label>Handicap</label>
-            <p>42</p>
-            <input type="submit" value="Add score" />
+            { currentEvent &&  
+                <>
+                    <label>Round</label>
+                    <select value={ currentRound } onChange={ selectRound }>
+                        <option>Select round…</option>
+                        { roundOptions }
+                    </select>
+                    { currentRound &&
+                        <>
+                            <label>Score</label>
+                            <input type="text" value={ currentScore } onChange={ setScore } />
+                            { hcLoaded && 
+                                <>
+                                    <label>Handicap</label>
+                                    <p>42</p>
+                                    <input type="submit" value="Add score" />
+                                </>
+                            }
+                        </>
+                    }
+                </>
+            }
             <hr />
             <h4>Scores so far</h4>
             { scoreRows }
