@@ -175,12 +175,14 @@ const Step2 = ({ athlete, scores, onComplete }) => {
 };
 
 
-const Step3 = ({ events, scores, onComplete }) => {
+const Step3 = ({ events, scores, addScore, onComplete }) => {
     const [addedScores, setAddedScores] = useState([]);
     const [currentEvent, setCurrentEvent] = useState("");
     const [currentRound, setCurrentRound] = useState("");
     const [currentScore, setCurrentScore] = useState("");
-    const [hcLoaded, setHcLoaded] = useState(false);
+    const [hc, setHc] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.eventId } />);
 
@@ -194,29 +196,69 @@ const Step3 = ({ events, scores, onComplete }) => {
     const eventOptions = events.map((ev) => {
         return <option value={ ev.identifier } key={ ev.identifier }>{ ev.name }</option>;
     })
+    let ev = null;
+    let rnd = null;
     let roundOptions = null;
 
     if (currentEvent) {
-        const ev = events.find((e) => e.identifier === currentEvent);
+        ev = events.find((e) => e.identifier === currentEvent);
         roundOptions = ev.rounds.map((r) => {
             return <option value={ r.codename } key={ r.codename }>{ r.name }</option>;
         })
     }
+    if (currentRound) {
+        rnd = ev.rounds.find((r) => r.codename === currentRound);
+    }
 
     const selectEvent = (e) => {
+        setError(null);
         setCurrentEvent(e.target.value);
         setCurrentRound("");
         setCurrentScore("");
-        setHcLoaded(false);
+        setHc(null);
     }
     const selectRound = (e) => {
+        setError(null);
         setCurrentRound(e.target.value);
         setCurrentScore("");
-        setHcLoaded(false);
+        setHc(null);
     }
     const setScore = (e) => {
-        setCurrentScore(e.target.score);
-        setHcLoaded(false);
+        setError(null);
+        setCurrentScore(e.target.value);
+        setHc(null);
+        setLoading(true);
+        var url = new URL('/api/handicap/', window.location.href);
+        var params = { round: currentRound, score: e.target.value };
+        url.search = new URLSearchParams(params).toString();
+        fetch(url).then((response) => response.json()).then((data) => {
+            setLoading(false);
+            if (data.error) {
+                console.error(data.error);
+                setError({ message: "Invalid score" });
+                return;
+            }
+            setHc(data.handicap);
+        });
+    }
+    const onAddScore = (e) => {
+        e.preventDefault();
+        setError(null);
+        setCurrentEvent("");
+        setCurrentRound("");
+        setCurrentScore("");
+        setHc(null);
+
+        console.log(scores);
+        const newScore = {
+            date: ev.date,
+            event: ev.name,
+            eventId: ev.identifier,
+            handicap: hc,
+            round: rnd.name,
+            score: currentScore,
+        };
+        addScore(newScore);
     }
 
     return (
@@ -245,17 +287,18 @@ const Step3 = ({ events, scores, onComplete }) => {
                         <>
                             <label>Score</label>
                             <input type="text" value={ currentScore } onChange={ setScore } />
-                            { hcLoaded && 
+                            { hc && 
                                 <>
                                     <label>Handicap</label>
-                                    <p>42</p>
-                                    <input type="submit" value="Add score" />
+                                    <p>{ hc }</p>
+                                    <input type="submit" value="Add score" onClick={ onAddScore } />
                                 </>
                             }
                         </>
                     }
                 </>
             }
+            { error && <p className="error">{ error.message }</p>}
             <hr />
             <h4>Scores so far</h4>
             { scoreRows }
@@ -311,9 +354,15 @@ const SubmissionFormManager = () => {
         setParams({ ...params, ...newParams });
     };
 
+    const addScore = (newScore) => {
+        let scores = [newScore, ...params.scores];
+        scores.sort((a, b) => a.handicap - b.handicap);
+        setParams({ ...params, scores });
+    };
+
     return (
         <Card>
-            <Current onComplete={ nextStep } { ...params } />
+            <Current onComplete={ nextStep } addScore={ addScore } { ...params } />
         </Card>
     );
 };

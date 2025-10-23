@@ -3,7 +3,7 @@ import math
 from django.core import validators
 from django.db import models
 
-from archeryutils.handicaps import handicap_from_score, HandicapAGB
+from archeryutils.handicaps import handicap_from_score
 
 from archerydjango.fields import (
     AgeField,

@@ -1,11 +1,14 @@
 import itertools
+import math
 
 from django.db.models import Count
 from django.http.response import JsonResponse
 from django.views.generic import TemplateView, View
 from django.utils import timezone
 
-from .allowed_rounds import get_allowed_rounds
+from archeryutils.handicaps import handicap_from_score
+
+from .allowed_rounds import all_available_rounds, get_allowed_rounds
 from .models import AthleteSeason, Event
 
 
@@ -90,3 +93,28 @@ class AvailableEvents(AthleteSeasonByAgbNo, View):
             } for event in events]
         });
 
+
+class Handicap(View):
+    def get(self, request, *args, **kwargs):
+        try:
+            handicap = self.calulcate_handicap()
+        except ResponseException as e:
+            return e.response
+        return JsonResponse({"handicap": handicap})
+
+    def calulcate_handicap(self):
+        if "round" not in self.request.GET:
+            raise ResponseException("Missing parameter: round", 400)
+        if "score" not in self.request.GET:
+            raise ResponseException("Missing parameter: score", 400)
+        if self.request.GET["round"] not in all_available_rounds:
+            raise ResponseException("Invalid parameter: round", 400)
+        try:
+            score = int(self.request.GET["score"])
+        except ValueError:
+            raise ResponseException("Invalid parameter: score", 400)
+        rnd = all_available_rounds[self.request.GET["round"]]
+        try:
+            return math.ceil(handicap_from_score(score, rnd, 'AGB'))
+        except ValueError:
+            raise ResponseException("Invalid score", 400)

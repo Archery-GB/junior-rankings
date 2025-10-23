@@ -8,5 +8,6 @@ urlpatterns = [
     path("api/athlete-details/", views.AthleteDetails.as_view(), name="athlete-details"),
     path("api/athlete-scores/", views.AthleteScores.as_view(), name="athlete-scores"),
     path("api/available-events/", views.AvailableEvents.as_view(), name="available-events"),
+    path("api/handicap/", views.Handicap.as_view(), name="handicap"),
     path("admin/", admin.site.urls),
 ]

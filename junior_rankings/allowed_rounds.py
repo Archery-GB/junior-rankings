@@ -103,14 +103,11 @@ def get_allowed_rounds(family, gender, age_group, bowstyle):
             DbAges.AGE_UNDER_21: 50,
         }
         rounds = []
-        print(age_group, bowstyle)
         for r in all_available_rounds.values():
             if r.family not in ["metric720", "wa720"]:
                 continue
-            print(r, r.codename)
             if bowstyle in [DbBowstyles.RECURVE, DbBowstyles.LONGBOW] and r.codename not in recurve_longbow_rounds:
                 continue
-            print(r)
             if bowstyle == DbBowstyles.COMPOUND and r.codename not in compound_rounds:
                 continue
             if bowstyle == DbBowstyles.BAREBOW and r.codename not in barebow_rounds:
