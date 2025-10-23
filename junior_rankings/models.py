@@ -3,7 +3,6 @@ import math
 from django.core import validators
 from django.db import models
 
-import archeryutils
 from archeryutils.handicaps import handicap_from_score, HandicapAGB
 
 from archerydjango.fields import (
@@ -12,6 +11,8 @@ from archerydjango.fields import (
     GenderField,
     RoundField,
 )
+
+from .allowed_rounds import all_available_rounds
 
 
 class Season(models.Model):
@@ -77,13 +78,7 @@ class Event(models.Model):
 class Score(models.Model):
     athlete_season = models.ForeignKey(AthleteSeason, on_delete=models.PROTECT)
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
-    shot_round = RoundField(
-        rounds=(
-            archeryutils.load_rounds.WA_outdoor
-            | archeryutils.load_rounds.AGB_outdoor_metric
-            | archeryutils.load_rounds.AGB_outdoor_imperial
-        )
-    )
+    shot_round = RoundField(all_available_rounds)
     score = models.PositiveIntegerField()
 
     def __str__(self):
@@ -122,11 +117,5 @@ class Submission(models.Model):
 class SubmissionScore(models.Model):
     submission = models.ForeignKey(Submission, on_delete=models.PROTECT)
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
-    shot_round = RoundField(
-        rounds=(
-            archeryutils.load_rounds.WA_outdoor
-            | archeryutils.load_rounds.AGB_outdoor_metric
-            | archeryutils.load_rounds.AGB_outdoor_imperial
-        )
-    )
+    shot_round = RoundField(rounds=all_available_rounds)
     score = models.PositiveIntegerField()
