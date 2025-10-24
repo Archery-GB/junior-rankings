@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import Cookies from 'cookies-js';
+
 
 const submissionFormApp = document.getElementById('app-submission-form');
 
@@ -14,7 +16,7 @@ const Card = ({ children }) => {
 };
 
 
-const Intro = ({ onComplete }) => {
+const Intro = ({ onComplete, toContact }) => {
     const [agbNo, setAgbNo] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -47,12 +49,14 @@ const Intro = ({ onComplete }) => {
                 <input type="number" className="standout" name="agb_number" placeholder="Archery GB Number" onChange={ (e) => setAgbNo(e.target.value) } />
                 <input disabled={ !agbNo || loading } type="submit" value={ submitLabel }/>
             </form>
+
+            <p className="help">Something not quite right? Please <a onClick={ toContact }>contact us</a>.</p>
         </>
     );
 };
 
 
-const Step1 = ({ athlete, onComplete }) => {
+const Step1 = ({ athlete, onComplete, toContact }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -90,7 +94,7 @@ const Step1 = ({ athlete, onComplete }) => {
                 <dt>Division</dt>
                 <dd>{ athlete.division }</dd>
             </dl>
-            <p className="help">Something not quite right? Please contact us.</p>
+            <p className="help">Something not quite right? Please <a onClick={ toContact }>contact us</a>.</p>
             <input type="submit" value="Confirm" onClick={ submit } />
         </>
     );
@@ -120,7 +124,7 @@ const ScoreRow = ({ score }) => {
 };
 
 
-const Step2 = ({ athlete, scores, onComplete }) => {
+const Step2 = ({ athlete, scores, toContact, onComplete }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -174,7 +178,7 @@ const Step2 = ({ athlete, scores, onComplete }) => {
                 <p>You require three qualifying scores to obtain a ranking. Please add some more.</p>
             || null }
 
-            <p className="help">Something not quite right? Please contact us.</p>
+            <p className="help">Something not quite right? Please <a onClick={ toContact }>contact us</a>.</p>
 
             { bestHandicap && <input type="submit" value="Confirm scores" onClick={ () => onComplete({}, 4) } /> }
             <input type="submit" value="Add more scores" onClick={ onAddScores } />
@@ -183,7 +187,7 @@ const Step2 = ({ athlete, scores, onComplete }) => {
 };
 
 
-const Step3 = ({ events, scores, addScore, onComplete }) => {
+const Step3 = ({ events, scores, addScore, toContact, onComplete }) => {
     const [addedScores, setAddedScores] = useState([]);
     const [currentEvent, setCurrentEvent] = useState("");
     const [currentRound, setCurrentRound] = useState("");
@@ -321,7 +325,7 @@ const Step3 = ({ events, scores, addScore, onComplete }) => {
                 </> || null
             }
 
-            <p className="help">Something not quite right? Please contact us.</p>
+            <p className="help">Something not quite right? Please <a onClick={ toContact }>contact us</a>.</p>
 
             { bestHandicap && <input type="submit" value="Confirm scores" onClick={ onComplete } /> }
         </>
@@ -340,6 +344,61 @@ const Outro = ({ onComplete }) => {
 };
 
 
+const Contact = ({ onComplete }) => {
+    const [email, setEmail] = useState("");
+    const [agbNo, setAgbNo] = useState("");
+    const [message, setMessage] = useState("");
+    const [complete, setComplete] = useState(false);
+
+    const onSubmit = (e) => {
+        e.preventDefault();
+        setComplete(true);
+        var url = new URL('/api/contact/', window.location.href);
+        const data = { email, agbNo, message };
+        const csrf = Cookies.get('csrftoken');
+        fetch(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf,
+            },
+            redirect: 'follow',
+        });
+    };
+
+    return (
+        <>
+            <h4>Something not quite right?</h4>
+            <p>This site is new for 2025 and has been developed by volunteers for the benefit of Archery GB. It probably doesn't cover every situation perfectly yet.</p>
+            <p>If you've got a problem, please complete the below form and we will get back to you as soon as we can.</p>
+            <hr />
+            { !complete && <form onSubmit={ onSubmit }>
+                <label>Your email</label>
+                <input type="email" value={ email } onChange={ (e) => setEmail(e.target.value) } />
+                <label>Archery GB Number</label>
+                <input type="number" placeholder="Membership number of the archer concerned" value={ agbNo } onChange={ (e) => setAgbNo(e.target.value) } />
+                <label>Message</label>
+                <textarea value={ message } onChange={ (e) => setMessage(e.target.value) }/>
+                <input type="submit" value="Contact" disabled={ !email || !agbNo || !message } />
+            </form> }
+            { complete &&
+                <>
+                    <h5>Message received</h5>
+                    <p>Thank you, we will be in touch.</p>
+                </>
+            }
+            <p>
+                <a onClick={ () => onComplete({}, 0) }>Back to start</a>
+            </p>
+        </>
+    );
+};
+
+
 const SubmissionFormManager = () => {
     const [step, setStep] = useState(0);
     const [params, setParams] = useState({});
@@ -350,6 +409,7 @@ const SubmissionFormManager = () => {
         Step2,
         Step3,
         Outro,
+        Contact,
     ];
     const Current = steps[step];
     if (!Current) {
@@ -366,6 +426,10 @@ const SubmissionFormManager = () => {
         setParams({ ...params, ...newParams });
     };
 
+    const toContact = () => {
+        nextStep({}, steps.length - 1);
+    };
+
     const addScore = (newScore) => {
         newScore.remove = (e) => {
             e.preventDefault();
@@ -379,7 +443,7 @@ const SubmissionFormManager = () => {
 
     return (
         <Card>
-            <Current onComplete={ nextStep } addScore={ addScore } { ...params } />
+            <Current onComplete={ nextStep } toContact={ toContact } addScore={ addScore } { ...params } />
         </Card>
     );
 };

@@ -171,6 +171,7 @@ button.small {
     font-weight: 400;
 }
 .card input[type=number],
+.card input[type=email],
 .card input[type=text] {
     font-family: stratos, sans-serif;
     padding: 8px 10px;
@@ -180,6 +181,18 @@ button.small {
     display: block;
     color: var(--text-grey);
     outline: var(--text-grey);
+}
+.card textarea {
+    font-family: stratos, sans-serif;
+    padding: 8px 10px;
+    font-size: 17px;
+    width: 100%;
+    min-height: 100px;
+    margin: 0;
+    display: block;
+    color: var(--text-grey);
+    outline: var(--text-grey);
+    resize: vertical;
 }
 .card input[type=submit] {
     font-family: stratos, sans-serif;

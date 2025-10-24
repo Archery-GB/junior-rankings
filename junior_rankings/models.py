@@ -119,3 +119,14 @@ class SubmissionScore(models.Model):
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
     shot_round = RoundField(rounds=all_available_rounds)
     score = models.PositiveIntegerField()
+
+
+class ContactResponse(models.Model):
+    email = models.EmailField()
+    agb_number = models.CharField(max_length=256)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    processed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "Message from {} at {}".format(self.email, self.timestamp)

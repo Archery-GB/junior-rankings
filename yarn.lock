@@ -1811,6 +1811,11 @@ cookie@0.7.1:
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.7.1.tgz#2f73c42142d5d5cf71310a74fc4ae61670e5dbc9"
   integrity sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==
 
+cookies-js@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/cookies-js/-/cookies-js-1.2.3.tgz#03315049e7c52bee3f73186a69167eab0ddb2d31"
+  integrity sha512-yqW9Kl46LcwedlF+2wyFSaCSwRKRrU6m3n9WoAsFfn23bpRfkEBwfOkD+lFw4jCLLs960ke/aM5Qe1BAhtgJmQ==
+
 core-js-compat@^3.43.0:
   version "3.46.0"
   resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.46.0.tgz#0c87126a19a1af00371e12b02a2b088a40f3c6f7"

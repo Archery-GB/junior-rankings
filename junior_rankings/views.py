@@ -1,4 +1,5 @@
 import itertools
+import json
 import math
 
 from django.db.models import Count
@@ -9,7 +10,7 @@ from django.utils import timezone
 from archeryutils.handicaps import handicap_from_score
 
 from .allowed_rounds import all_available_rounds, get_allowed_rounds
-from .models import AthleteSeason, Event
+from .models import AthleteSeason, ContactResponse, Event
 
 
 class Root(TemplateView):
@@ -118,3 +119,14 @@ class Handicap(View):
             return math.ceil(handicap_from_score(score, rnd, 'AGB'))
         except ValueError:
             raise ResponseException("Invalid score", 400)
+
+
+class Contact(View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        ContactResponse.objects.create(
+            email=data["email"],
+            agb_number=data["agbNo"],
+            message=data["message"],
+        )
+        return JsonResponse({"status": "ok"})

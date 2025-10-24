@@ -8,6 +8,7 @@ from .models import (
     Score,
     Submission,
     SubmissionScore,
+    ContactResponse,
 )
 
 admin.site.register(Season)
@@ -17,3 +18,4 @@ admin.site.register(Event)
 admin.site.register(Score)
 admin.site.register(Submission)
 admin.site.register(SubmissionScore)
+admin.site.register(ContactResponse)
