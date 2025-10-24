@@ -70,6 +70,9 @@ h5 {
     font-size: 17px;
     margin: 1em 0 0.5em;
     color: var(--red);
+    align-items: baseline;
+    display: flex;
+    justify-content: space-between;
 }
 
 
@@ -136,6 +139,16 @@ hr {
     border-top: 1px solid var(--text-grey);
 }
 
+button.small {
+    font-size: 13px;
+    padding: 3px 7px;
+    color: white;
+    background-color: var(--red);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
 .card {
     background-color: white;
     width: 100%;
@@ -144,10 +157,10 @@ hr {
     padding: 30px;
     color: var(--text-grey);
 }
-.card :first-child {
+.card > :first-child {
     margin-top: 0;
 }
-.card :last-child {
+.card > :last-child {
     margin-bottom: 0;
 }
 .card label {

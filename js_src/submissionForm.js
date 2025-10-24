@@ -100,7 +100,10 @@ const Step1 = ({ athlete, onComplete }) => {
 const ScoreRow = ({ score }) => {
     return (
         <>
-            <h5>{ score.event }</h5>
+            <h5>
+                { score.event }
+                { score.tempId && <button className="small" onClick={ score.remove }>Remove</button> }
+            </h5>
             <dl>
                 <dt>Date</dt>
                 <dd>{ new Date(score.date).toDateString() }</dd>
@@ -158,13 +161,18 @@ const Step2 = ({ athlete, scores, onComplete }) => {
             </p>
             <hr />
 
+            { !scoreRows.length &&
+                <p className="error">We were not able to find any scores from our existing data for you. Please add some on the next page.</p>
+            }
+
             { scoreRows }
 
-            <h5>Ranking total</h5>
+            { scoreRows.length && <h5>Ranking total</h5> || null }
             { bestHandicap &&
-                <p>Your best three scores give an aggregate handicap of <strong>{ bestHandicap }</strong>.</p> ||
+                <p>Your best three scores give an aggregate handicap of <strong>{ bestHandicap }</strong>.</p> }
+            { (scoreRows.length && !bestHandicap) &&
                 <p>You require three qualifying scores to obtain a ranking. Please add some more.</p>
-            }
+            || null }
 
             <p className="help">Something not quite right? Please contact us.</p>
 
@@ -249,7 +257,6 @@ const Step3 = ({ events, scores, addScore, onComplete }) => {
         setCurrentScore("");
         setHc(null);
 
-        console.log(scores);
         const newScore = {
             date: ev.date,
             event: ev.name,
@@ -257,6 +264,7 @@ const Step3 = ({ events, scores, addScore, onComplete }) => {
             handicap: hc,
             round: rnd.name,
             score: currentScore,
+            tempId: new Date().toISOString(),
         };
         addScore(newScore);
     }
@@ -273,14 +281,14 @@ const Step3 = ({ events, scores, addScore, onComplete }) => {
             <h4>Add a score</h4>
             <label>Event</label>
             <select value={ currentEvent } onChange={ selectEvent }>
-                <option>Select event…</option>
+                <option value="">Select event…</option>
                 { eventOptions }
             </select>
             { currentEvent &&  
                 <>
                     <label>Round</label>
                     <select value={ currentRound } onChange={ selectRound }>
-                        <option>Select round…</option>
+                        <option value="">Select round…</option>
                         { roundOptions }
                     </select>
                     { currentRound &&
@@ -300,13 +308,17 @@ const Step3 = ({ events, scores, addScore, onComplete }) => {
             }
             { error && <p className="error">{ error.message }</p>}
             <hr />
-            <h4>Scores so far</h4>
-            { scoreRows }
+            { scores.length &&
+                <>
+                    <h4>Scores so far</h4>
+                    { scoreRows }
 
-            <h5>Ranking total</h5>
-            { bestHandicap &&
-                <p>Your best three scores give an aggregate handicap of <strong>{ bestHandicap }</strong>.</p> ||
-                <p>You require three qualifying scores to obtain a ranking. Please add some more.</p>
+                    <h5>Ranking total</h5>
+                    { bestHandicap &&
+                        <p>Your best three scores give an aggregate handicap of <strong>{ bestHandicap }</strong>.</p> ||
+                        <p>You require three qualifying scores to obtain a ranking. Please add some more.</p>
+                    }
+                </> || null
             }
 
             <p className="help">Something not quite right? Please contact us.</p>
@@ -355,6 +367,11 @@ const SubmissionFormManager = () => {
     };
 
     const addScore = (newScore) => {
+        newScore.remove = (e) => {
+            e.preventDefault();
+            const scores = params.scores.filter((s) => s.tempId !== newScore.tempId);
+            setParams({ ...params, scores });
+        };
         let scores = [newScore, ...params.scores];
         scores.sort((a, b) => a.handicap - b.handicap);
         setParams({ ...params, scores });
