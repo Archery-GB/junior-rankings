@@ -71,6 +71,12 @@ class Event(models.Model):
     name = models.CharField(max_length=512)
     date = models.DateField()  # First day for multi-day events
     round_family = models.CharField(max_length=64)
+    round_age_rules = models.CharField(max_length=20, blank=True, default='', choices=[
+        ("", "Unknown - Use shortest allowed round"),
+        ("jas", "Junior Archery Series"),
+        ("nt", "National Tour"),
+        ("nt-1440", "National Tour (1440)"),
+    ], help_text="To identify round by age group for imported events")
 
     def __str__(self):
         return self.name

@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.contrib import admin, messages
+from django.db import transaction
 
 import requests
 from django_object_actions import DjangoObjectActions, action
 
-from archerydjango.fields import DbBowstyles, DbGender
+from archerydjango.fields import DbAges, DbBowstyles, DbGender
 from archerydjango.utils import get_age_group
 
-from .allowed_rounds import get_allowed_rounds
+from .allowed_rounds import all_rounds, get_allowed_rounds
 from .models import (
     Season,
     Athlete,
@@ -34,6 +35,7 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
     change_actions = ["import_scores"]
 
     @action(label="Import scores", description="Import scores from AGB extranet")
+    @transaction.atomic
     def import_scores(self, request, obj):
         if not obj.extranet_id:
             self.message_user(request, "Cannot import scores: Event has no extranet ID.", messages.ERROR)
@@ -64,6 +66,12 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
             if record["Score"] == "0":
                 # Skip athletes with a score of 0 as DNS
                 continue
+            if record["AthID"] == "0":
+                # Skip athletes with a missing AGB Number
+                continue
+            if not (record["Code"].endswith("M") or record["Code"].endswith("W")):
+                # Skip records with e.g. RMLD?
+                continue
 
             athlete_data = {}
             athlete_data["agb_number"] = record["AthID"]
@@ -84,7 +92,7 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                 athlete_data["surname"] = api_athlete["full_name"].split(" ", 1)[1]
                 athlete_data["year"] = int(api_athlete["YOB"])
                 
-                athlete = Athlete.objects.create(
+                athlete = Athlete(
                     agb_number=athlete_data["agb_number"],
                     forename=athlete_data["forename"],
                     surname=athlete_data["surname"],
@@ -93,6 +101,19 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                 )
 
             athlete_data["age_group"] = get_age_group(athlete.year, obj.date.year)
+            if athlete_data["age_group"] in [
+                DbAges.AGE_UNDER_21,
+                DbAges.AGE_UNDER_18,
+                DbAges.AGE_UNDER_16,
+                DbAges.AGE_UNDER_15,
+                DbAges.AGE_UNDER_14,
+                DbAges.AGE_UNDER_12,
+            ]:
+                athlete.save()
+            else:
+                # Skip any adult scores
+                continue
+
             try:
                 athlete_season = AthleteSeason.objects.get(
                     athlete=athlete,
@@ -107,12 +128,42 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                     bowstyle=athlete_data["bowstyle"],
                 )
 
-            athlete_data["shot_round"] = get_allowed_rounds(
-                family=obj.round_family,
-                gender=athlete_data["gender"],
-                age_group=athlete_data["age_group"],
-                bowstyle=athlete_data["bowstyle"],
-            )[0]
+            competed_age_group = record["Code"][1:-1]
+            try:
+                athlete_data["competed_age_group"] = DbAges.__lookup__[competed_age_group]
+            except KeyError:
+                athlete_data["competed_age_group"] = DbAges.AGE_UNDER_21
+
+            if not obj.round_age_rules:
+                athlete_data["shot_round"] = get_allowed_rounds(
+                    family=obj.round_family,
+                    gender=athlete_data["gender"],
+                    age_group=athlete_data["competed_age_group"],
+                    bowstyle=athlete_data["bowstyle"],
+                )[0]
+            elif obj.round_age_rules == "jas":
+                shot_round = {
+                    "BY": "wa720_50_b",
+                    "CY": "wa720_50_c",
+                    "RU15": "metric_122_40",
+                    "RU18": "wa720_60",
+                    "RU21": "wa720_70",
+                }[record["Code"][:-1]]
+                athlete_data["shot_round"] = all_rounds[shot_round]
+            elif obj.round_age_rules == "nt":
+                shot_round = {
+                    "B": "wa720_50_b",
+                    "C": "wa720_50_c",
+                    "R": "wa720_70",
+                    "L": "wa720_70",
+                }[record["Code"][0]]
+                athlete_data["shot_round"] = all_rounds[shot_round]
+            elif obj.round_age_rules == "nt-1440":
+                shot_round = {
+                    "M": "wa1440_90",
+                    "W": "wa1440_70",
+                }[record["Code"][-1]]
+                athlete_data["shot_round"] = all_rounds[shot_round]
 
             Score.objects.create(
                 athlete_season=athlete_season,
@@ -126,10 +177,20 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
         self.message_user(request, "%s new scores imported" % total_created, messages.SUCCESS)
 
 
+@admin.register(Score)
+class ScoreAdmin(admin.ModelAdmin):
+    list_display = ["score", "athlete_season__athlete", "event"]
+    list_filter = ["event"]
+
+
+@admin.register(AthleteSeason)
+class AthleteSeasonAdmin(admin.ModelAdmin):
+    list_display = ["athlete", "season", "age_group", "bowstyle"]
+    list_filter = ["season", "bowstyle", "age_group"]
+    search_fields = ["athlete__forename", "athlete__surname", "athlete__agb_number"]
+
 
 admin.site.register(Season)
-admin.site.register(AthleteSeason)
-admin.site.register(Score)
 admin.site.register(Submission)
 admin.site.register(SubmissionScore)
 admin.site.register(ContactResponse)
