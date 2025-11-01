@@ -67,6 +67,7 @@ class AthleteSeason(models.Model):
 
 class Event(models.Model):
     identifier = models.CharField(max_length=256)
+    extranet_id = models.CharField(max_length=256, blank=True, default='')
     name = models.CharField(max_length=512)
     date = models.DateField()  # First day for multi-day events
     round_family = models.CharField(max_length=64)
