@@ -15,6 +15,8 @@ whitenoise = "*"
 django-enumfield = "*"
 archeryutils = {ref = "b0e6035c965793ec14c30147980e155994a65d21", git = "git+https://github.com/jatkinson1000/archeryutils.git"}
 django-webpack-loader = "*"
+django-object-actions = "*"
+requests = "*"
 
 [dev-packages]
 

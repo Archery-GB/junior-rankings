@@ -20,6 +20,7 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     "junior_rankings",
     "webpack_loader",
+    "django_object_actions",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -105,3 +106,5 @@ WEBPACK_LOADER = {
         "STATS_FILE": os.path.join(BASE_DIR, "build", "webpack-stats.json"),
     },
 }
+
+AGB_API_TOKEN = os.environ.get("AGB_API_TOKEN", "")
