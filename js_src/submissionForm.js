@@ -85,8 +85,6 @@ const Step1 = ({ athlete, onComplete, toContact }) => {
                 <dd>{ athlete.agbNo }</dd>
                 <dt>Name</dt>
                 <dd>{ athlete.name }</dd>
-                <dt>Year of Birth</dt>
-                <dd>{ athlete.year }</dd>
                 <dt>Gender</dt>
                 <dd>{ athlete.gender }</dd>
                 <dt>Age class</dt>

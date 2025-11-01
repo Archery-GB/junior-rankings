@@ -49,7 +49,6 @@ class AthleteDetails(AthleteSeasonByAgbNo, View):
         return JsonResponse({
             "agbNo": athlete.agb_number,
             "name": athlete.name,
-            "year": athlete.year,
             "gender": athlete.gender.label,
             "age": athlete_season.age_group.label,
             "division": athlete_season.bowstyle.label,
