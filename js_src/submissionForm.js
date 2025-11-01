@@ -44,7 +44,7 @@ const Intro = ({ onComplete, toContact }) => {
     return (
         <>
             <p>We are currently in the score submission phase. Please enter your Archery GB number below to start checking your scores.</p>
-            { error && <p className="error">We cannot find a junior archer for the membership number { error.agbNo }.</p> }
+            { error && <p className="error">We cannot find a junior archer for the membership number { error.agbNo }. This may be an error with the number, or could be that you didn't take part in any events we already have data for. Please use the contact link below and we'll be in touch.</p> }
             <form onSubmit={ submit }>
                 <input type="number" className="standout" name="agb_number" placeholder="Archery GB Number" onChange={ (e) => setAgbNo(e.target.value) } />
                 <input disabled={ !agbNo || loading } type="submit" value={ submitLabel }/>
