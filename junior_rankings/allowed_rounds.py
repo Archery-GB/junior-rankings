@@ -7,6 +7,7 @@ allowed_families = [
     "metric720",
     "wa1440",
     "metric1440",
+    "wa900",
     "agb900",
     "york_hereford_bristol",
     "stgeorge_albion_windsor",
@@ -81,7 +82,10 @@ def get_allowed_rounds(family, gender, age_group, bowstyle):
             if r.family != family:
                 continue
             if r.max_distance().value >= agb_900_required_distances[age_group]:
-                rounds.append(r)
+                if r.codename == "agb900_60":
+                    rounds.append(all_rounds["wa900"])
+                else:
+                    rounds.append(r)
     if family == "metric720":
         recurve_longbow_rounds = ["wa720_70", "wa720_60", "metric_122_50", "metric_122_40", "metric_122_30"]
         compound_rounds = ["wa720_50_c", "metric_80_40", "metric_80_30"]

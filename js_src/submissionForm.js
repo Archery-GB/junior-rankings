@@ -204,7 +204,8 @@ const Step3 = ({ events, scores, addScore, toContact, onComplete }) => {
     }
 
     const eventOptions = events.map((ev) => {
-        return <option value={ ev.identifier } key={ ev.identifier }>{ ev.name }</option>;
+        const date = new Date(ev.date);
+        return <option value={ ev.identifier } key={ ev.identifier }>{ date.getDate() }/{ date.getMonth() + 1 }/{ date.getFullYear() } - { ev.name }</option>;
     })
     let ev = null;
     let rnd = null;
@@ -278,6 +279,10 @@ const Step3 = ({ events, scores, addScore, toContact, onComplete }) => {
             Scores must have been shot during 2025 at a World or UK Record status
             competition, and they must have been on a qualifying round for your age
             group and division.
+            </p>
+            <p className="help">
+            This may show rounds of the correct family which were not available
+            at the event. It will only show rounds eligible for your age group.
             </p>
             <hr />
             <h4>Add a score</h4>
