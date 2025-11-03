@@ -69,14 +69,14 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
             if record["AthID"] == "0":
                 # Skip athletes with a missing AGB Number
                 continue
-            if not (record["Code"].endswith("M") or record["Code"].endswith("W")):
+            if not (record["Category"].endswith("M") or record["Category"].endswith("W")):
                 # Skip records with e.g. RMLD?
                 continue
 
             athlete_data = {}
             athlete_data["agb_number"] = record["AthID"]
-            athlete_data["gender"] = DbGender.__lookup__[record["Code"][-1]]
-            athlete_data["bowstyle"] = DbBowstyles.__lookup__[record["Code"][0]]
+            athlete_data["gender"] = DbGender.__lookup__[record["Category"][-1]]
+            athlete_data["bowstyle"] = DbBowstyles.__lookup__[record["Category"][0]]
             athlete_data["score"] = record["Score"]
 
             try:
@@ -128,7 +128,7 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                     bowstyle=athlete_data["bowstyle"],
                 )
 
-            competed_age_group = record["Code"][1:-1]
+            competed_age_group = record["Category"][1:-1]
             try:
                 athlete_data["competed_age_group"] = DbAges.__lookup__[competed_age_group]
             except KeyError:
@@ -148,7 +148,7 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                     "RU15": "metric_122_40",
                     "RU18": "wa720_60",
                     "RU21": "wa720_70",
-                }[record["Code"][:-1]]
+                }[record["Category"][:-1]]
                 athlete_data["shot_round"] = all_rounds[shot_round]
             elif obj.round_age_rules == "nt":
                 shot_round = {
@@ -156,21 +156,42 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                     "C": "wa720_50_c",
                     "R": "wa720_70",
                     "L": "wa720_70",
-                }[record["Code"][0]]
+                }[record["Category"][0]]
                 athlete_data["shot_round"] = all_rounds[shot_round]
             elif obj.round_age_rules == "nt-1440":
                 shot_round = {
                     "M": "wa1440_90",
                     "W": "wa1440_70",
-                }[record["Code"][-1]]
+                }[record["Category"][-1]]
                 athlete_data["shot_round"] = all_rounds[shot_round]
 
-            Score.objects.create(
+            # For now, remove duplicates. When the double rounds work, this will need some conditions!
+
+            if Score.objects.filter(
                 athlete_season=athlete_season,
                 event=obj,
-                shot_round=athlete_data["shot_round"],
-                score=athlete_data["score"],
-            )
+            ).exists():
+                continue
+            if "Score1" in record:
+                Score.objects.create(
+                    athlete_season=athlete_season,
+                    event=obj,
+                    shot_round=athlete_data["shot_round"],
+                    score=record["Score1"],
+                )
+                Score.objects.create(
+                    athlete_season=athlete_season,
+                    event=obj,
+                    shot_round=athlete_data["shot_round"],
+                    score=record["Score2"],
+                )
+            else:
+                Score.objects.create(
+                    athlete_season=athlete_season,
+                    event=obj,
+                    shot_round=athlete_data["shot_round"],
+                    score=athlete_data["score"],
+                )
 
             total_created += 1
 
