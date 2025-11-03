@@ -126,7 +126,7 @@ const Step2 = ({ athlete, scores, toContact, onComplete }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.eventId } />);
+    const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.id } />);
 
     const hasThree = scores.length >= 3;
 
@@ -194,7 +194,7 @@ const Step3 = ({ events, scores, addScore, toContact, onComplete }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.eventId } />);
+    const scoreRows = scores.map((score) => <ScoreRow score={ score } key={ score.id || score.tempId } />);
 
     const hasThree = scores.length >= 3;
 
@@ -239,6 +239,9 @@ const Step3 = ({ events, scores, addScore, toContact, onComplete }) => {
         setCurrentScore(e.target.value);
         setHc(null);
         setLoading(true);
+        if (!e.target.value) {
+            return;
+        }
         var url = new URL('/api/handicap/', window.location.href);
         var params = { round: currentRound, score: e.target.value };
         url.search = new URLSearchParams(params).toString();
@@ -427,6 +430,7 @@ const SubmissionFormManager = () => {
             setStep(step + 1);
         }
         setParams({ ...params, ...newParams });
+        window.scrollTo({top: 0});
     };
 
     const toContact = () => {

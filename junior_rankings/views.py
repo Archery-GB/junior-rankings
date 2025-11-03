@@ -64,6 +64,7 @@ class AthleteScores(AthleteSeasonByAgbNo, View):
         scores = athlete_season.score_set.all()
         return JsonResponse({
             "scores": [{
+                "id": score.pk,
                 "score": score.score,
                 "round": score.shot_round.name,
                 "event": score.event.name,
