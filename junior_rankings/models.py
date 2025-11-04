@@ -101,27 +101,12 @@ class Score(models.Model):
         return math.ceil(handicap_from_score(self.score, self.shot_round, 'AGB'))
 
 
-###
-# One day, we delete everything below here because we have all scores digitally
-##
-
-
 class Submission(models.Model):
-    agb_number = models.CharField(max_length=256)
-    forename = models.CharField(max_length=256)
-    surname = models.CharField(max_length=256)
-    year = models.PositiveIntegerField(
-        "Year of Birth",
-        validators=[
-            validators.MinValueValidator(2000),
-            validators.MaxValueValidator(2100),
-        ],
-    )
-    gender = GenderField()
-    bowstyle = BowstyleField()
+    athlete_season = models.ForeignKey(AthleteSeason, on_delete=models.PROTECT)
 
 
 class SubmissionScore(models.Model):
+    # Additional scores submitted by the user
     submission = models.ForeignKey(Submission, on_delete=models.PROTECT)
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
     shot_round = RoundField(rounds=all_available_rounds)

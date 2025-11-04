@@ -122,7 +122,7 @@ const ScoreRow = ({ score }) => {
 };
 
 
-const Step2 = ({ athlete, scores, toContact, onComplete }) => {
+const Step2 = ({ athlete, scores, toContact, onComplete, submitFinal }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -178,14 +178,14 @@ const Step2 = ({ athlete, scores, toContact, onComplete }) => {
 
             <p className="help">Something not quite right? Please <a onClick={ toContact }>contact us</a>.</p>
 
-            { bestHandicap && <input type="submit" value="Confirm scores" onClick={ () => onComplete({}, 4) } /> }
+            { bestHandicap && <input type="submit" value="Confirm scores" onClick={ submitFinal } /> }
             <input type="submit" value="Add more scores" onClick={ onAddScores } />
         </>
     );
 };
 
 
-const Step3 = ({ events, scores, addScore, toContact, onComplete }) => {
+const Step3 = ({ events, scores, addScore, toContact, onComplete, submitFinal }) => {
     const [addedScores, setAddedScores] = useState([]);
     const [currentEvent, setCurrentEvent] = useState("");
     const [currentRound, setCurrentRound] = useState("");
@@ -269,6 +269,7 @@ const Step3 = ({ events, scores, addScore, toContact, onComplete }) => {
             eventId: ev.identifier,
             handicap: hc,
             round: rnd.name,
+            roundCodename: rnd.codename,
             score: currentScore,
             tempId: new Date().toISOString(),
         };
@@ -333,7 +334,7 @@ const Step3 = ({ events, scores, addScore, toContact, onComplete }) => {
 
             <p className="help">Something not quite right? Please <a onClick={ toContact }>contact us</a>.</p>
 
-            { bestHandicap && <input type="submit" value="Confirm scores" onClick={ onComplete } /> }
+            { bestHandicap && <input type="submit" value="Confirm scores" onClick={ submitFinal } /> }
         </>
     );
 };
@@ -448,9 +449,36 @@ const SubmissionFormManager = () => {
         setParams({ ...params, scores });
     };
 
+    const submitFinal = (e) => {
+        e.preventDefault();
+        var url = new URL('/api/submit/', window.location.href);
+        const data = { agbNo: params.athlete.agbNo, scores: params.scores.filter((s) => s.tempId).map((s) => {
+            return {
+                score: s.score,
+                round: s.roundCodename,
+                event: s.eventId,
+            };
+        })};
+        const csrf = Cookies.get('csrftoken');
+        fetch(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf,
+            },
+            redirect: 'follow',
+        }).then(() => {
+            nextStep({}, steps.length - 2);
+        });
+    };
+
     return (
         <Card>
-            <Current onComplete={ nextStep } toContact={ toContact } addScore={ addScore } { ...params } />
+            <Current onComplete={ nextStep } toContact={ toContact } addScore={ addScore } submitFinal={ submitFinal } { ...params } />
         </Card>
     );
 };

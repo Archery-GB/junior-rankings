@@ -10,7 +10,7 @@ from django.utils import timezone
 from archeryutils.handicaps import handicap_from_score
 
 from .allowed_rounds import all_available_rounds, get_allowed_rounds
-from .models import AthleteSeason, ContactResponse, Event
+from .models import AthleteSeason, ContactResponse, Event, Submission, SubmissionScore
 
 
 class Root(TemplateView):
@@ -119,6 +119,26 @@ class Handicap(View):
             return math.ceil(handicap_from_score(score, rnd, 'AGB'))
         except ValueError:
             raise ResponseException("Invalid score", 400)
+
+
+class Submit(View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        # FIXME This will break if anyone has double bow styles but there aren't any (yet!)
+        athlete_season = AthleteSeason.objects.get(
+            athlete__agb_number=data["agbNo"],
+            season__year=2025,
+        )
+        submission = Submission.objects.create(athlete_season=athlete_season)
+        for score in data["scores"]:
+            event = Event.objects.get(identifier=score["event"])
+            SubmissionScore.objects.create(
+                submission=submission,
+                event=event,
+                shot_round=score["round"],
+                score=score["score"],
+            )
+        return JsonResponse({"status": "ok"})
 
 
 class Contact(View):
