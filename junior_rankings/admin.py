@@ -29,7 +29,7 @@ class AthleteAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
-    list_display = ["name", "date", "round_family"]
+    list_display = ["name", "identifier", "date", "round_family"]
     list_filter = ["date", "round_family"]
     search_fields = ["name"]
     change_actions = ["import_scores"]

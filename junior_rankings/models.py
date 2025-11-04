@@ -104,6 +104,9 @@ class Score(models.Model):
 class Submission(models.Model):
     athlete_season = models.ForeignKey(AthleteSeason, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return "Submission for %s" % self.athlete_season
+
 
 class SubmissionScore(models.Model):
     # Additional scores submitted by the user
@@ -111,6 +114,9 @@ class SubmissionScore(models.Model):
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
     shot_round = RoundField(rounds=all_available_rounds)
     score = models.PositiveIntegerField()
+
+    def __str__(self):
+        return "Score submitted for %s - %s on %s at %s" % (self.submission.athlete_season, self.score, self.shot_round.name, self.event)
 
 
 class ContactResponse(models.Model):

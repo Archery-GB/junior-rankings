@@ -118,7 +118,7 @@ def get_allowed_rounds(family, gender, age_group, bowstyle):
                 continue
             if bowstyle in [DbBowstyles.RECURVE, DbBowstyles.LONGBOW] and r.max_distance().value >= recurve_longbow_distances[age_group]:
                 rounds.append(r)
-            if bowstyle in [DbBowstyles.COMPOUND, DbBowstyles.BAREBOW] and r.max_distance().value >= recurve_longbow_distances[age_group]:
+            if bowstyle in [DbBowstyles.COMPOUND, DbBowstyles.BAREBOW] and r.max_distance().value >= compound_barebow_distances[age_group]:
                 rounds.append(r)
     rounds.reverse()
     return rounds
