@@ -306,7 +306,7 @@ const Step3 = ({ events, scores, addScore, toContact, onComplete, submitFinal })
                         <>
                             <label>Score</label>
                             <input type="text" value={ currentScore } onChange={ setScore } />
-                            { hc && 
+                            { (hc === 0 || hc) && 
                                 <>
                                     <label>Handicap</label>
                                     <p>{ hc }</p>
