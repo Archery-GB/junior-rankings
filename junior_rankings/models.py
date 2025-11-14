@@ -1,5 +1,3 @@
-import math
-
 from django.core import validators
 from django.db import models
 
@@ -98,7 +96,7 @@ class Score(models.Model):
 
     @property
     def handicap(self):
-        return math.ceil(handicap_from_score(self.score, self.shot_round, 'AGB'))
+        return handicap_from_score(self.score, self.shot_round, 'AGB', int_prec=True)
 
 
 class Submission(models.Model):

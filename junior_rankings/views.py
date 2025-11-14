@@ -1,11 +1,7 @@
-import itertools
 import json
-import math
 
-from django.db.models import Count
 from django.http.response import JsonResponse
 from django.views.generic import TemplateView, View
-from django.utils import timezone
 
 from archeryutils.handicaps import handicap_from_score
 
@@ -33,7 +29,7 @@ class AthleteSeasonByAgbNo(object):
         if "agb_number" not in self.request.GET:
             raise ResponseException("Missing parameter: agb_number", 400)
         try:
-            athlete_season = AthleteSeason.objects.get(season__year=2025, athlete__agb_number=self.request.GET["agb_number"]);
+            athlete_season = AthleteSeason.objects.get(season__year=2025, athlete__agb_number=self.request.GET["agb_number"])
         except AthleteSeason.DoesNotExist:
             raise ResponseException("Athlete not found", 404)
         return athlete_season
@@ -52,7 +48,7 @@ class AthleteDetails(AthleteSeasonByAgbNo, View):
             "gender": athlete.gender.label,
             "age": athlete_season.age_group.label,
             "division": athlete_season.bowstyle.label,
-        });
+        })
 
 
 class AthleteScores(AthleteSeasonByAgbNo, View):
@@ -72,7 +68,7 @@ class AthleteScores(AthleteSeasonByAgbNo, View):
                 "date": score.event.date,
                 "handicap": score.handicap,
             } for score in sorted(scores, key=lambda s: s.handicap)]
-        });
+        })
 
 
 class AvailableEvents(AthleteSeasonByAgbNo, View):
@@ -92,7 +88,7 @@ class AvailableEvents(AthleteSeasonByAgbNo, View):
                     "name": r.name,
                 } for r in get_allowed_rounds(event.round_family, athlete_season.athlete.gender, athlete_season.age_group, athlete_season.bowstyle)]
             } for event in events]
-        });
+        })
 
 
 class Handicap(View):
@@ -116,7 +112,7 @@ class Handicap(View):
             raise ResponseException("Invalid parameter: score", 400)
         rnd = all_available_rounds[self.request.GET["round"]]
         try:
-            return math.ceil(handicap_from_score(score, rnd, 'AGB'))
+            return handicap_from_score(score, rnd, 'AGB', int_prec=True)
         except ValueError:
             raise ResponseException("Invalid score", 400)
 
