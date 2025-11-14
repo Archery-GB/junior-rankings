@@ -1,6 +1,7 @@
-from archeryutils.rounds import Round
 from django import forms
 from django.db.models import BLANK_CHOICE_DASH
+
+from archeryutils.rounds import Round
 
 
 class RoundField(forms.ChoiceField):

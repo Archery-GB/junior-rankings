@@ -18,6 +18,7 @@ django-object-actions = "*"
 requests = "*"
 black = "*"
 isort = "*"
+sentry-sdk = {extras = ["django"], version = "*"}
 
 [dev-packages]
 

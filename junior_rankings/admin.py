@@ -1,15 +1,18 @@
-import requests
 from django.conf import settings
 from django.contrib import admin, messages
 from django.db import transaction
+
+import requests
 from django_object_actions import DjangoObjectActions, action
 
 from archerydjango.fields import DbAges, DbBowstyles, DbGender
 from archerydjango.utils import get_age_group
 
 from .allowed_rounds import all_rounds, get_allowed_rounds
-from .models import (Athlete, AthleteSeason, ContactResponse, Event, Score,
-                     Season, Submission, SubmissionScore)
+from .models import (
+    Athlete, AthleteSeason, ContactResponse, Event, Score, Season, Submission,
+    SubmissionScore,
+)
 
 
 @admin.register(Athlete)

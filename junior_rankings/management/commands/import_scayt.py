@@ -1,8 +1,9 @@
 import json
 
-import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
+import requests
 
 from archerydjango.fields import DbBowstyles
 from archerydjango.utils import get_age_group

@@ -1,12 +1,14 @@
 import json
 
-from archeryutils.handicaps import handicap_from_score
 from django.http.response import JsonResponse
 from django.views.generic import TemplateView, View
 
+from archeryutils.handicaps import handicap_from_score
+
 from .allowed_rounds import all_available_rounds, get_allowed_rounds
-from .models import (AthleteSeason, ContactResponse, Event, Submission,
-                     SubmissionScore)
+from .models import (
+    AthleteSeason, ContactResponse, Event, Submission, SubmissionScore,
+)
 
 
 class Root(TemplateView):

@@ -1,9 +1,11 @@
-from archeryutils.handicaps import handicap_from_score
 from django.core import validators
 from django.db import models
 
-from archerydjango.fields import (AgeField, BowstyleField, GenderField,
-                                  RoundField)
+from archeryutils.handicaps import handicap_from_score
+
+from archerydjango.fields import (
+    AgeField, BowstyleField, GenderField, RoundField,
+)
 
 from .allowed_rounds import all_available_rounds
 
