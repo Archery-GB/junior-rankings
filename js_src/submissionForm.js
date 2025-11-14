@@ -424,18 +424,23 @@ const SubmissionFormManager = () => {
         return <h1>Error</h1>;
     }
 
-    const nextStep = (newParams, nextStep=null) => {
+    const nextStep = (newParams, nextStep=null, clearError=false) => {
         if (nextStep !== null) {
             setStep(nextStep);
         } else {
             setStep(step + 1);
         }
-        setParams({ ...params, ...newParams });
+
+        const nextParams = { ...params, ...newParams };
+        if (clearError) {
+            delete nextParams.error;
+        }
+        setParams(nextParams);
         window.scrollTo({top: 0});
     };
 
     const toContact = () => {
-        nextStep({}, steps.length - 1);
+        nextStep({}, steps.length - 1, true);
     };
 
     const scoreSorter = (scoreA, scoreB) => {
@@ -477,10 +482,23 @@ const SubmissionFormManager = () => {
                 'X-CSRFToken': csrf,
             },
             redirect: 'follow',
-        }).then(() => {
+        }).then((response) => {
+            if (response.status !== 200) {
+                setParams({ ...params, error: "Something went wrong" });
+                window.scrollTo({top: 0});
+                return;
+            }
             nextStep({}, steps.length - 2);
         });
     };
+
+    if (params.error) {
+        return (
+            <Card>
+                <p className="error">Something went wrong. Please <a onClick={ toContact }>contact us</a>.</p>
+            </Card>
+        );
+    }
 
     return (
         <Card>
