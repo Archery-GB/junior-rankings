@@ -1,24 +1,15 @@
+import requests
 from django.conf import settings
 from django.contrib import admin, messages
 from django.db import transaction
-
-import requests
 from django_object_actions import DjangoObjectActions, action
 
 from archerydjango.fields import DbAges, DbBowstyles, DbGender
 from archerydjango.utils import get_age_group
 
 from .allowed_rounds import all_rounds, get_allowed_rounds
-from .models import (
-    Season,
-    Athlete,
-    AthleteSeason,
-    Event,
-    Score,
-    Submission,
-    SubmissionScore,
-    ContactResponse,
-)
+from .models import (Athlete, AthleteSeason, ContactResponse, Event, Score,
+                     Season, Submission, SubmissionScore)
 
 
 @admin.register(Athlete)
@@ -38,7 +29,11 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
     @transaction.atomic
     def import_scores(self, request, obj):
         if not obj.extranet_id:
-            self.message_user(request, "Cannot import scores: Event has no extranet ID.", messages.ERROR)
+            self.message_user(
+                request,
+                "Cannot import scores: Event has no extranet ID.",
+                messages.ERROR,
+            )
             return
 
         try:
@@ -47,16 +42,28 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                 params={"SHOOTCODE": obj.extranet_id},
             )
         except:
-            self.message_user(request, "Cannot import scores: Something went wrong accessing the Extranet API", messages.ERROR)
+            self.message_user(
+                request,
+                "Cannot import scores: Something went wrong accessing the Extranet API",
+                messages.ERROR,
+            )
             return
 
         data = response.json()["value"]
         if not len(data):
-            self.message_user(request, "Cannot import scores: No scores received from API", messages.ERROR)
+            self.message_user(
+                request,
+                "Cannot import scores: No scores received from API",
+                messages.ERROR,
+            )
             return
 
         if Score.objects.filter(event=obj).exists():
-            self.message_user(request, "Cannot import scores: Already have scores for this event.", messages.ERROR)
+            self.message_user(
+                request,
+                "Cannot import scores: Already have scores for this event.",
+                messages.ERROR,
+            )
             return
 
         total_created = 0
@@ -69,7 +76,9 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
             if record["AthID"] == "0":
                 # Skip athletes with a missing AGB Number
                 continue
-            if not (record["Category"].endswith("M") or record["Category"].endswith("W")):
+            if not (
+                record["Category"].endswith("M") or record["Category"].endswith("W")
+            ):
                 # Skip records with e.g. RMLD?
                 continue
 
@@ -91,7 +100,7 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                 athlete_data["forename"] = api_athlete["full_name"].split(" ", 1)[0]
                 athlete_data["surname"] = api_athlete["full_name"].split(" ", 1)[1]
                 athlete_data["year"] = int(api_athlete["YOB"])
-                
+
                 athlete = Athlete(
                     agb_number=athlete_data["agb_number"],
                     forename=athlete_data["forename"],
@@ -130,7 +139,9 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
 
             competed_age_group = record["Category"][1:-1]
             try:
-                athlete_data["competed_age_group"] = DbAges.__lookup__[competed_age_group]
+                athlete_data["competed_age_group"] = DbAges.__lookup__[
+                    competed_age_group
+                ]
             except KeyError:
                 athlete_data["competed_age_group"] = DbAges.AGE_UNDER_21
 
@@ -195,7 +206,9 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
 
             total_created += 1
 
-        self.message_user(request, "%s new scores imported" % total_created, messages.SUCCESS)
+        self.message_user(
+            request, "%s new scores imported" % total_created, messages.SUCCESS
+        )
 
 
 @admin.register(Score)

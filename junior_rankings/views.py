@@ -1,12 +1,12 @@
 import json
 
+from archeryutils.handicaps import handicap_from_score
 from django.http.response import JsonResponse
 from django.views.generic import TemplateView, View
 
-from archeryutils.handicaps import handicap_from_score
-
 from .allowed_rounds import all_available_rounds, get_allowed_rounds
-from .models import AthleteSeason, ContactResponse, Event, Submission, SubmissionScore
+from .models import (AthleteSeason, ContactResponse, Event, Submission,
+                     SubmissionScore)
 
 
 class Root(TemplateView):
@@ -19,9 +19,12 @@ class Root(TemplateView):
 class ResponseException(Exception):
     def __init__(self, message, status):
         super().__init__(message)
-        self.response = JsonResponse({
-            "error": message,
-        }, status=status)
+        self.response = JsonResponse(
+            {
+                "error": message,
+            },
+            status=status,
+        )
 
 
 class AthleteSeasonByAgbNo(object):
@@ -29,7 +32,9 @@ class AthleteSeasonByAgbNo(object):
         if "agb_number" not in self.request.GET:
             raise ResponseException("Missing parameter: agb_number", 400)
         try:
-            athlete_season = AthleteSeason.objects.get(season__year=2025, athlete__agb_number=self.request.GET["agb_number"])
+            athlete_season = AthleteSeason.objects.get(
+                season__year=2025, athlete__agb_number=self.request.GET["agb_number"]
+            )
         except AthleteSeason.DoesNotExist:
             raise ResponseException("Athlete not found", 404)
         return athlete_season
@@ -42,13 +47,15 @@ class AthleteDetails(AthleteSeasonByAgbNo, View):
         except ResponseException as e:
             return e.response
         athlete = athlete_season.athlete
-        return JsonResponse({
-            "agbNo": athlete.agb_number,
-            "name": athlete.name,
-            "gender": athlete.gender.label,
-            "age": athlete_season.age_group.label,
-            "division": athlete_season.bowstyle.label,
-        })
+        return JsonResponse(
+            {
+                "agbNo": athlete.agb_number,
+                "name": athlete.name,
+                "gender": athlete.gender.label,
+                "age": athlete_season.age_group.label,
+                "division": athlete_season.bowstyle.label,
+            }
+        )
 
 
 class AthleteScores(AthleteSeasonByAgbNo, View):
@@ -58,17 +65,22 @@ class AthleteScores(AthleteSeasonByAgbNo, View):
         except ResponseException as e:
             return e.response
         scores = athlete_season.score_set.all()
-        return JsonResponse({
-            "scores": [{
-                "id": score.pk,
-                "score": score.score,
-                "round": score.shot_round.name,
-                "event": score.event.name,
-                "eventId": score.event.identifier,
-                "date": score.event.date,
-                "handicap": score.handicap,
-            } for score in sorted(scores, key=lambda s: s.handicap)]
-        })
+        return JsonResponse(
+            {
+                "scores": [
+                    {
+                        "id": score.pk,
+                        "score": score.score,
+                        "round": score.shot_round.name,
+                        "event": score.event.name,
+                        "eventId": score.event.identifier,
+                        "date": score.event.date,
+                        "handicap": score.handicap,
+                    }
+                    for score in sorted(scores, key=lambda s: s.handicap)
+                ]
+            }
+        )
 
 
 class AvailableEvents(AthleteSeasonByAgbNo, View):
@@ -77,18 +89,33 @@ class AvailableEvents(AthleteSeasonByAgbNo, View):
             athlete_season = self.load_athlete_season()
         except ResponseException as e:
             return e.response
-        events = Event.objects.exclude(score__athlete_season=athlete_season).order_by('date')
-        return JsonResponse({
-            "events": [{
-                "identifier": event.identifier,
-                "name": event.name,
-                "date": event.date,
-                "rounds": [{
-                    "codename": r.codename,
-                    "name": r.name,
-                } for r in get_allowed_rounds(event.round_family, athlete_season.athlete.gender, athlete_season.age_group, athlete_season.bowstyle)]
-            } for event in events]
-        })
+        events = Event.objects.exclude(score__athlete_season=athlete_season).order_by(
+            "date"
+        )
+        return JsonResponse(
+            {
+                "events": [
+                    {
+                        "identifier": event.identifier,
+                        "name": event.name,
+                        "date": event.date,
+                        "rounds": [
+                            {
+                                "codename": r.codename,
+                                "name": r.name,
+                            }
+                            for r in get_allowed_rounds(
+                                event.round_family,
+                                athlete_season.athlete.gender,
+                                athlete_season.age_group,
+                                athlete_season.bowstyle,
+                            )
+                        ],
+                    }
+                    for event in events
+                ]
+            }
+        )
 
 
 class Handicap(View):
@@ -112,7 +139,7 @@ class Handicap(View):
             raise ResponseException("Invalid parameter: score", 400)
         rnd = all_available_rounds[self.request.GET["round"]]
         try:
-            return handicap_from_score(score, rnd, 'AGB', int_prec=True)
+            return handicap_from_score(score, rnd, "AGB", int_prec=True)
         except ValueError:
             raise ResponseException("Invalid score", 400)
 

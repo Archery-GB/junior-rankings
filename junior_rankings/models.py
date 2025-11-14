@@ -1,14 +1,9 @@
+from archeryutils.handicaps import handicap_from_score
 from django.core import validators
 from django.db import models
 
-from archeryutils.handicaps import handicap_from_score
-
-from archerydjango.fields import (
-    AgeField,
-    BowstyleField,
-    GenderField,
-    RoundField,
-)
+from archerydjango.fields import (AgeField, BowstyleField, GenderField,
+                                  RoundField)
 
 from .allowed_rounds import all_available_rounds
 
@@ -65,16 +60,22 @@ class AthleteSeason(models.Model):
 
 class Event(models.Model):
     identifier = models.CharField(max_length=256)
-    extranet_id = models.CharField(max_length=256, blank=True, default='')
+    extranet_id = models.CharField(max_length=256, blank=True, default="")
     name = models.CharField(max_length=512)
     date = models.DateField()  # First day for multi-day events
     round_family = models.CharField(max_length=64)
-    round_age_rules = models.CharField(max_length=20, blank=True, default='', choices=[
-        ("", "Unknown - Use shortest allowed round"),
-        ("jas", "Junior Archery Series"),
-        ("nt", "National Tour"),
-        ("nt-1440", "National Tour (1440)"),
-    ], help_text="To identify round by age group for imported events")
+    round_age_rules = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        choices=[
+            ("", "Unknown - Use shortest allowed round"),
+            ("jas", "Junior Archery Series"),
+            ("nt", "National Tour"),
+            ("nt-1440", "National Tour (1440)"),
+        ],
+        help_text="To identify round by age group for imported events",
+    )
 
     def __str__(self):
         return self.name
@@ -96,7 +97,7 @@ class Score(models.Model):
 
     @property
     def handicap(self):
-        return handicap_from_score(self.score, self.shot_round, 'AGB', int_prec=True)
+        return handicap_from_score(self.score, self.shot_round, "AGB", int_prec=True)
 
 
 class Submission(models.Model):
@@ -114,7 +115,12 @@ class SubmissionScore(models.Model):
     score = models.PositiveIntegerField()
 
     def __str__(self):
-        return "Score submitted for %s - %s on %s at %s" % (self.submission.athlete_season, self.score, self.shot_round.name, self.event)
+        return "Score submitted for %s - %s on %s at %s" % (
+            self.submission.athlete_season,
+            self.score,
+            self.shot_round.name,
+            self.event,
+        )
 
 
 class ContactResponse(models.Model):

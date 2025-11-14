@@ -1,6 +1,6 @@
 from archeryutils import load_rounds
-from archerydjango.fields import DbGender, DbAges, DbBowstyles
 
+from archerydjango.fields import DbAges, DbBowstyles, DbGender
 
 allowed_families = [
     "wa720",
@@ -20,7 +20,9 @@ all_rounds = (
     | load_rounds.AGB_outdoor_imperial
 )
 
-all_available_rounds = {k: r for (k, r) in all_rounds.items() if r.family in allowed_families}
+all_available_rounds = {
+    k: r for (k, r) in all_rounds.items() if r.family in allowed_families
+}
 
 
 def get_allowed_rounds(family, gender, age_group, bowstyle):
@@ -45,7 +47,10 @@ def get_allowed_rounds(family, gender, age_group, bowstyle):
         for r in all_available_rounds.values():
             if r.family != family:
                 continue
-            if r.max_distance().value >= imperial_required_distances[(gender, age_group)]:
+            if (
+                r.max_distance().value
+                >= imperial_required_distances[(gender, age_group)]
+            ):
                 rounds.append(r)
     if family == "metric1440":
         wa_1440_required_distances = {
@@ -66,7 +71,10 @@ def get_allowed_rounds(family, gender, age_group, bowstyle):
         for r in all_available_rounds.values():
             if r.family not in ["wa1440", "metric1440"]:
                 continue
-            if r.max_distance().value >= wa_1440_required_distances[(gender, age_group)]:
+            if (
+                r.max_distance().value
+                >= wa_1440_required_distances[(gender, age_group)]
+            ):
                 rounds.append(r)
     if family == "agb900":
         agb_900_required_distances = {
@@ -87,7 +95,13 @@ def get_allowed_rounds(family, gender, age_group, bowstyle):
                 else:
                     rounds.append(r)
     if family == "metric720":
-        recurve_longbow_rounds = ["wa720_70", "wa720_60", "metric_122_50", "metric_122_40", "metric_122_30"]
+        recurve_longbow_rounds = [
+            "wa720_70",
+            "wa720_60",
+            "metric_122_50",
+            "metric_122_40",
+            "metric_122_30",
+        ]
         compound_rounds = ["wa720_50_c", "metric_80_40", "metric_80_30"]
         barebow_rounds = ["wa720_50_b", "metric_122_40", "metric_122_30"]
         recurve_longbow_distances = {
@@ -110,15 +124,24 @@ def get_allowed_rounds(family, gender, age_group, bowstyle):
         for r in all_available_rounds.values():
             if r.family not in ["metric720", "wa720"]:
                 continue
-            if bowstyle in [DbBowstyles.RECURVE, DbBowstyles.LONGBOW] and r.codename not in recurve_longbow_rounds:
+            if (
+                bowstyle in [DbBowstyles.RECURVE, DbBowstyles.LONGBOW]
+                and r.codename not in recurve_longbow_rounds
+            ):
                 continue
             if bowstyle == DbBowstyles.COMPOUND and r.codename not in compound_rounds:
                 continue
             if bowstyle == DbBowstyles.BAREBOW and r.codename not in barebow_rounds:
                 continue
-            if bowstyle in [DbBowstyles.RECURVE, DbBowstyles.LONGBOW] and r.max_distance().value >= recurve_longbow_distances[age_group]:
+            if (
+                bowstyle in [DbBowstyles.RECURVE, DbBowstyles.LONGBOW]
+                and r.max_distance().value >= recurve_longbow_distances[age_group]
+            ):
                 rounds.append(r)
-            if bowstyle in [DbBowstyles.COMPOUND, DbBowstyles.BAREBOW] and r.max_distance().value >= compound_barebow_distances[age_group]:
+            if (
+                bowstyle in [DbBowstyles.COMPOUND, DbBowstyles.BAREBOW]
+                and r.max_distance().value >= compound_barebow_distances[age_group]
+            ):
                 rounds.append(r)
     rounds.reverse()
     return rounds
