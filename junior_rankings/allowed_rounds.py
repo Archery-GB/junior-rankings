@@ -93,7 +93,7 @@ def get_allowed_rounds(family, gender, age_group, bowstyle):
         recurve_longbow_distances = {
             DbAges.AGE_UNDER_12: 30,
             DbAges.AGE_UNDER_14: 40,
-            DbAges.AGE_UNDER_15: 50,
+            DbAges.AGE_UNDER_15: 40,
             DbAges.AGE_UNDER_16: 50,
             DbAges.AGE_UNDER_18: 60,
             DbAges.AGE_UNDER_21: 70,
