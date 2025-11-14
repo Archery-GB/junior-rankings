@@ -344,7 +344,7 @@ const Outro = ({ onComplete }) => {
     return (
         <>
             <h4>Thank you!</h4>
-            <p>Your scores will be verified and the final rankings will be published in November.</p>
+            <p>Your scores will be verified and the final rankings will be published in December.</p>
             <a onClick={ () => onComplete({}, 0) }>Back to start</a>
         </>
     );
