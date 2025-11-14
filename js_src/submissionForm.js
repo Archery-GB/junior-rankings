@@ -438,6 +438,12 @@ const SubmissionFormManager = () => {
         nextStep({}, steps.length - 1);
     };
 
+    const scoreSorter = (scoreA, scoreB) => {
+        const hcDiff = scoreA.handicap - scoreB.handicap;
+        if (hcDiff !== 0) return hcDiff;
+        return scoreB.score - scoreA.score;
+    };
+
     const addScore = (newScore) => {
         newScore.remove = (e) => {
             e.preventDefault();
@@ -445,7 +451,7 @@ const SubmissionFormManager = () => {
             setParams({ ...params, scores });
         };
         let scores = [newScore, ...params.scores];
-        scores.sort((a, b) => a.handicap - b.handicap);
+        scores.sort(scoreSorter);
         setParams({ ...params, scores });
     };
 

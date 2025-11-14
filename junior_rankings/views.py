@@ -77,7 +77,7 @@ class AthleteScores(AthleteSeasonByAgbNo, View):
                         "date": score.event.date,
                         "handicap": score.handicap,
                     }
-                    for score in sorted(scores, key=lambda s: s.handicap)
+                    for score in sorted(scores, key=lambda s: (s.handicap, -s.score))
                 ]
             }
         )
