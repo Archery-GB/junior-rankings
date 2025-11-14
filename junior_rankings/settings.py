@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 import dj_database_url
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -95,16 +97,25 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "build")]
-STATIC_ROOT = os.path.join(BASE_DIR, "collected_static")
+STATICFILES_DIRS = [BASE_DIR / "build"]
+STATIC_ROOT = BASE_DIR / "collected_static"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
         "BUNDLE_DIR_NAME": "bundles/",
-        "STATS_FILE": os.path.join(BASE_DIR, "build", "webpack-stats.json"),
+        "STATS_FILE": BASE_DIR / "build" / "webpack-stats.json",
     },
 }
 
 AGB_API_TOKEN = os.environ.get("AGB_API_TOKEN", "")
+
+SOURCE_VERSION = os.environ.get('SOURCE_VERSION', 'dev')
+
+if os.environ.get('SENTRY_DSN'):
+    sentry_sdk.init(
+        dsn=os.environ.get('SENTRY_DSN'),
+        release=SOURCE_VERSION,
+        integrations=[DjangoIntegration()]
+    )

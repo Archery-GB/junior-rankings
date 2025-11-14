@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# The post_compile hook is run by heroku-buildpack-python
+echo "export SOURCE_VERSION=$SOURCE_VERSION" > $BUILD_DIR/.profile.d/source_version.sh
