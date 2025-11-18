@@ -19,6 +19,7 @@ requests = "*"
 black = "*"
 isort = "*"
 sentry-sdk = {extras = ["django"], version = "*"}
+django-braces = "*"
 
 [dev-packages]
 

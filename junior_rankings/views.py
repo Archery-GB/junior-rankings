@@ -4,6 +4,7 @@ from django.http.response import JsonResponse
 from django.views.generic import TemplateView, View
 
 from archeryutils.handicaps import handicap_from_score
+from braces.views import CsrfExemptMixin
 
 from .allowed_rounds import all_available_rounds, get_allowed_rounds
 from .models import (
@@ -146,7 +147,7 @@ class Handicap(View):
             raise ResponseException("Invalid score", 400)
 
 
-class Submit(View):
+class Submit(CsrfExemptMixin, View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
         # FIXME This will break if anyone has double bow styles but there aren't any (yet!)
@@ -166,7 +167,7 @@ class Submit(View):
         return JsonResponse({"status": "ok"})
 
 
-class Contact(View):
+class Contact(CsrfExemptMixin, View):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
         ContactResponse.objects.create(
