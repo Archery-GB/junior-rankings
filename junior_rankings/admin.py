@@ -227,7 +227,11 @@ class AthleteSeasonAdmin(admin.ModelAdmin):
     search_fields = ["athlete__forename", "athlete__surname", "athlete__agb_number"]
 
 
+@admin.register(ContactResponse)
+class ContactResponseAdmin(admin.ModelAdmin):
+    list_display = ["email", "processed", "timestamp"]
+
+
 admin.site.register(Season)
 admin.site.register(Submission)
 admin.site.register(SubmissionScore)
-admin.site.register(ContactResponse)

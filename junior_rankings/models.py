@@ -104,6 +104,7 @@ class Score(models.Model):
 
 class Submission(models.Model):
     athlete_season = models.ForeignKey(AthleteSeason, on_delete=models.PROTECT)
+    submitted = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return "Submission for %s" % self.athlete_season
