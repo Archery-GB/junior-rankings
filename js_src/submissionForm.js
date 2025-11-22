@@ -3,35 +3,19 @@ import { createRoot } from 'react-dom/client';
 
 import Cookies from 'cookies-js';
 
-
-const submissionFormApp = document.getElementById('app-submission-form');
-
-
-const Card = ({ children }) => {
-    return (
-        <div className="card">
-            { children }
-        </div>
-    );
-};
+import useLoadData from './hooks/useLoadData';
+import Card from './layout/Card';
 
 
 const Intro = ({ onComplete, toContact }) => {
     const [agbNo, setAgbNo] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const { error, loading, load } = useLoadData('athlete-details')
 
     const submit = (e) => {
         e.preventDefault();
-        setLoading(true);
-        var url = new URL('/api/athlete-details/', window.location.href);
-        var params = { agb_number: agbNo };
-        url.search = new URLSearchParams(params).toString();
-        fetch(url).then((response) => response.json()).then((data) => {
-            setLoading(false);
+        load({ agb_number: agbNo }).then((data) => {
             if (data.error) {
-                console.error(data.error);
-                setError({ agbNo });
+                data.agbNo = agbNo;
                 return;
             }
             onComplete({ athlete: data });
@@ -44,7 +28,7 @@ const Intro = ({ onComplete, toContact }) => {
     return (
         <>
             <p>We are currently in the score submission phase. Please enter your Archery GB number below to start checking your scores.</p>
-            { error && <p className="error">We cannot find a junior archer for the membership number { error.agbNo }. This may be an error with the number, or could be that you didn't take part in any events we already have data for. Please use the contact link below and we'll be in touch.</p> }
+            { error && <p className="error">We cannot find a junior archer for the membership number { error.params.agb_number }. This may be an error with the number, or could be that you didn't take part in any events we already have data for. Please use the contact link below and we'll be in touch.</p> }
             <form onSubmit={ submit }>
                 <input type="number" className="standout" name="agb_number" placeholder="Archery GB Number" onChange={ (e) => setAgbNo(e.target.value) } />
                 <input disabled={ !agbNo || loading } type="submit" value={ submitLabel }/>
@@ -506,6 +490,8 @@ const SubmissionFormManager = () => {
         </Card>
     );
 };
+
+const submissionFormApp = document.getElementById('app-submission-form');
 
 if (submissionFormApp) {
     const root = createRoot(submissionFormApp);
