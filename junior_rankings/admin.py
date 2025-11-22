@@ -232,6 +232,10 @@ class ContactResponseAdmin(admin.ModelAdmin):
     list_display = ["email", "processed", "timestamp"]
 
 
+@admin.register(Submission)
+class SubmissionAdmin(admin.ModelAdmin):
+    list_display = ['athlete_season__athlete', 'submitted']
+
+
 admin.site.register(Season)
-admin.site.register(Submission)
 admin.site.register(SubmissionScore)
