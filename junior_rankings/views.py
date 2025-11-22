@@ -4,7 +4,7 @@ from django.http.response import JsonResponse
 from django.views.generic import TemplateView, View
 
 from archeryutils.handicaps import handicap_from_score
-from braces.views import CsrfExemptMixin
+from braces.views import CsrfExemptMixin, LoginRequiredMixin
 
 from .allowed_rounds import all_available_rounds, get_allowed_rounds
 from .models import (
@@ -17,6 +17,13 @@ class Root(TemplateView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(page_name="root", **kwargs)
+
+
+class Verify(LoginRequiredMixin, TemplateView):
+    template_name = "junior_rankings/verify.html"
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(page_name="verify", **kwargs)
 
 
 class ResponseException(Exception):

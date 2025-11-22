@@ -43,6 +43,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "junior_rankings.urls"
+LOGIN_URL = "/admin/login/"
 
 TEMPLATES = [
     {

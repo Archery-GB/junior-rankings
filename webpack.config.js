@@ -8,7 +8,8 @@ const devModeServer = 'http://localhost:8080';
 
 const config = {
     entry: {
-        'submissionForm': './js_src/submissionForm.js'
+        'submissionForm': './js_src/submissionForm.js',
+        'verifyFlow': './js_src/verifyFlow.js',
     },
     mode: devMode ? 'development' : 'production',
     output: {
