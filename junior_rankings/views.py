@@ -8,7 +8,11 @@ from braces.views import CsrfExemptMixin, LoginRequiredMixin
 
 from .allowed_rounds import all_available_rounds, get_allowed_rounds
 from .models import (
-    AthleteSeason, ContactResponse, Event, Submission, SubmissionScore,
+    AthleteSeason,
+    ContactResponse,
+    Event,
+    Submission,
+    SubmissionScore,
 )
 
 
@@ -183,3 +187,54 @@ class Contact(CsrfExemptMixin, View):
             message=data["message"],
         )
         return JsonResponse({"status": "ok"})
+
+
+class ScoresToVerify(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        submissions = Submission.objects.select_related(
+            "athlete_season", "athlete_season__athlete"
+        ).prefetch_related(
+            "submissionscore_set",
+            "submissionscore_set__event",
+            "athlete_season__score_set",
+            "athlete_season__score_set__event",
+        )
+
+        data = {}
+        for sub in submissions:
+            athlete_season = sub.athlete_season
+            athlete = athlete_season.athlete
+            scores = sorted(athlete_season.score_set.all(), key=lambda s: s.handicap)
+            new_scores = sorted(sub.submissionscore_set.all(), key=lambda s: s.handicap)
+            if athlete_season.id not in data:
+                data[athlete_season.id] = {
+                    "agbNo": athlete.agb_number,
+                    "name": athlete.name,
+                    "gender": athlete.gender.label,
+                    "age": athlete_season.age_group.label,
+                    "division": athlete_season.bowstyle.label,
+                    "existingScores": [
+                        {
+                            "score": score.score,
+                            "event": score.event.name,
+                            "round": score.shot_round.name,
+                            "handicap": score.handicap,
+                        }
+                        for score in scores
+                    ],
+                    "newScores": [],
+                }
+            data[athlete_season.id]["newScores"] += [
+                {
+                    "score": score.score,
+                    "event": score.event.name,
+                    "round": score.shot_round.name,
+                    "handicap": score.handicap,
+                }
+                for score in new_scores
+            ]
+        to_verify = sorted(
+            data.values(),
+            key=lambda a: (a["division"], a["gender"], a["age"], a["agbNo"]),
+        )
+        return JsonResponse({"status": "ok", "toVerify": to_verify})

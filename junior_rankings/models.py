@@ -4,7 +4,10 @@ from django.db import models
 from archeryutils.handicaps import handicap_from_score
 
 from archerydjango.fields import (
-    AgeField, BowstyleField, GenderField, RoundField,
+    AgeField,
+    BowstyleField,
+    GenderField,
+    RoundField,
 )
 
 from .allowed_rounds import all_available_rounds
@@ -116,6 +119,10 @@ class SubmissionScore(models.Model):
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
     shot_round = RoundField(rounds=all_available_rounds)
     score = models.PositiveIntegerField()
+
+    @property
+    def handicap(self):
+        return handicap_from_score(self.score, self.shot_round, "AGB", int_prec=True)
 
     def __str__(self):
         return "Score submitted for %s - %s on %s at %s" % (

@@ -11,6 +11,7 @@ const VerifyFlow = () => {
     const loadData = (e) => {
         e.preventDefault();
         load().then((data) => {
+            console.log(data);
             setToVerify(data);
         });
     };

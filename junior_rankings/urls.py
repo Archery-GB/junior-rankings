@@ -18,5 +18,8 @@ urlpatterns = [
     path("api/handicap/", views.Handicap.as_view(), name="handicap"),
     path("api/submit/", views.Submit.as_view(), name="submit"),
     path("api/contact/", views.Contact.as_view(), name="contact"),
+    path(
+        "api/scores-to-verify/", views.ScoresToVerify.as_view(), name="scores-to-verify"
+    ),
     path("admin/", admin.site.urls),
 ]

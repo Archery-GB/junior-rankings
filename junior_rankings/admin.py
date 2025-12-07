@@ -10,7 +10,13 @@ from archerydjango.utils import get_age_group
 
 from .allowed_rounds import all_rounds, get_allowed_rounds
 from .models import (
-    Athlete, AthleteSeason, ContactResponse, Event, Score, Season, Submission,
+    Athlete,
+    AthleteSeason,
+    ContactResponse,
+    Event,
+    Score,
+    Season,
+    Submission,
     SubmissionScore,
 )
 
@@ -234,7 +240,7 @@ class ContactResponseAdmin(admin.ModelAdmin):
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ['athlete_season__athlete', 'submitted']
+    list_display = ["athlete_season__athlete", "submitted"]
 
 
 admin.site.register(Season)

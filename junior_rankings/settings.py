@@ -112,11 +112,11 @@ WEBPACK_LOADER = {
 
 AGB_API_TOKEN = os.environ.get("AGB_API_TOKEN", "")
 
-SOURCE_VERSION = os.environ.get('SOURCE_VERSION', 'dev')
+SOURCE_VERSION = os.environ.get("SOURCE_VERSION", "dev")
 
-if os.environ.get('SENTRY_DSN'):
+if os.environ.get("SENTRY_DSN"):
     sentry_sdk.init(
-        dsn=os.environ.get('SENTRY_DSN'),
+        dsn=os.environ.get("SENTRY_DSN"),
         release=SOURCE_VERSION,
-        integrations=[DjangoIntegration()]
+        integrations=[DjangoIntegration()],
     )

@@ -5,7 +5,8 @@ from archeryutils.classifications.agb_outdoor_classifications import (
     outdoor_bowstyles,
 )
 from archeryutils.classifications.classification_utils import (
-    read_ages_json, read_bowstyles_json,
+    read_ages_json,
+    read_bowstyles_json,
 )
 from archeryutils.rounds import Round
 from django_enumfield.db.fields import EnumField
