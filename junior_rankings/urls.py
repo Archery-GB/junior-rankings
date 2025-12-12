@@ -21,5 +21,8 @@ urlpatterns = [
     path(
         "api/scores-to-verify/", views.ScoresToVerify.as_view(), name="scores-to-verify"
     ),
+    path(
+        "api/submission-details/", views.SubmissionDetails.as_view(), name="submission-details"
+    ),
     path("admin/", admin.site.urls),
 ]

@@ -139,14 +139,24 @@ hr {
     border-top: 1px solid var(--text-grey);
 }
 
-button.small {
-    font-size: 13px;
-    padding: 3px 7px;
+button {
     color: white;
     background-color: var(--red);
     border: none;
     border-radius: 4px;
     cursor: pointer;
+}
+button[disabled] {
+    background: var(--text-grey);
+    color: white;
+    cursor: not-allowed;
+}
+button.small {
+    font-size: 13px;
+    padding: 3px 7px;
+}
+button.active {
+    background: var(--blue);
 }
 
 .card {
@@ -211,6 +221,7 @@ button.small {
 }
 .card input[type=submit][disabled] {
     background: var(--text-grey);
+    cursor: not-allowed;
 }
 .card input[type=submit]:hover {
     background: white;

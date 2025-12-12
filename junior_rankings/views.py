@@ -135,12 +135,12 @@ class AvailableEvents(AthleteSeasonByAgbNo, View):
 class Handicap(View):
     def get(self, request, *args, **kwargs):
         try:
-            handicap = self.calulcate_handicap()
+            handicap = self.calculate_handicap()
         except ResponseException as e:
             return e.response
         return JsonResponse({"handicap": handicap})
 
-    def calulcate_handicap(self):
+    def calculate_handicap(self):
         if "round" not in self.request.GET:
             raise ResponseException("Missing parameter: round", 400)
         if "score" not in self.request.GET:
@@ -204,37 +204,58 @@ class ScoresToVerify(LoginRequiredMixin, View):
         for sub in submissions:
             athlete_season = sub.athlete_season
             athlete = athlete_season.athlete
-            scores = sorted(athlete_season.score_set.all(), key=lambda s: s.handicap)
-            new_scores = sorted(sub.submissionscore_set.all(), key=lambda s: s.handicap)
+            # scores = sorted(athlete_season.score_set.all(), key=lambda s: s.handicap)
+            # new_scores = sorted(sub.submissionscore_set.all(), key=lambda s: s.handicap)
             if athlete_season.id not in data:
                 data[athlete_season.id] = {
+                    "id": athlete_season.id,
                     "agbNo": athlete.agb_number,
                     "name": athlete.name,
                     "gender": athlete.gender.label,
                     "age": athlete_season.age_group.label,
                     "division": athlete_season.bowstyle.label,
-                    "existingScores": [
-                        {
-                            "score": score.score,
-                            "event": score.event.name,
-                            "round": score.shot_round.name,
-                            "handicap": score.handicap,
-                        }
-                        for score in scores
-                    ],
-                    "newScores": [],
                 }
-            data[athlete_season.id]["newScores"] += [
-                {
-                    "score": score.score,
-                    "event": score.event.name,
-                    "round": score.shot_round.name,
-                    "handicap": score.handicap,
-                }
-                for score in new_scores
-            ]
         to_verify = sorted(
             data.values(),
             key=lambda a: (a["division"], a["gender"], a["age"], a["agbNo"]),
         )
         return JsonResponse({"status": "ok", "toVerify": to_verify})
+
+
+class SubmissionDetails(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        try:
+            season = AthleteSeason.objects.get(pk=request.GET["id"])
+        except (AthleteSeason.DoesNotExist, KeyError):
+            return JsonResponse({"status": "error", "message": "Season not found"}, status=404)
+        scores = [
+            {
+                "id": "checked:%s" % score.id,
+                "score": score.score,
+                "event": score.event.name,
+                "date": score.event.date,
+                "round": score.shot_round.name,
+                "handicap": score.handicap,
+                "verified": True,
+            }
+            for score in sorted(season.score_set.all(), key=lambda s: s.handicap)
+        ]
+
+        submitted = sorted(
+            SubmissionScore.objects.filter(submission__athlete_season=season).all(),
+            key=lambda s: s.handicap,
+        )
+        new_scores = [
+            {
+                "id": score.id,
+                "score": score.score,
+                "event": score.event.name,
+                "date": score.event.date,
+                "round": score.shot_round.name,
+                "handicap": score.handicap,
+                "verified": False,
+            }
+            for score in submitted
+        ]
+
+        return JsonResponse({"status": "ok", "scores": scores, "newScores": new_scores})
