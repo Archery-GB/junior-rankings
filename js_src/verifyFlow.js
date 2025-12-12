@@ -46,7 +46,7 @@ const ScoreRow = ({ score, accept, onChange }) => {
 };
 
 
-const ScoreChecker = ({ athlete, scores, newScores }) => {
+const ScoreChecker = ({ athlete, scores, newScores, onScoreSaved }) => {
     const [toSave, setToSave] = useState({});
     const [saved, setSaved] = useState(false);
 
@@ -115,6 +115,7 @@ const VerifyFlow = () => {
     const [toVerify, setToVerify] = useState(null);
     const [current, setCurrent] = useState(null);
     const [next, setNext] = useState(null);
+    const [count, setCount] = useState(null);
     const { error, loading, load } = useLoadData('scores-to-verify')
     const athleteLoadData = useLoadData('submission-details');
     const errorAthlete = athleteLoadData.error;
@@ -125,6 +126,7 @@ const VerifyFlow = () => {
         e.preventDefault();
         load().then((data) => {
             setToVerify(data.toVerify)
+            setCount(data.toVerify.length);
             if (data.toVerify.length) {
                 setNext(data.toVerify[0]);
             }
@@ -147,15 +149,19 @@ const VerifyFlow = () => {
         };
     };
 
+    const onScoreSaved = () => {
+        setCount(count - 1);
+    }
+
     let scoreCheck = null;
     if (current) {
-        scoreCheck = <ScoreChecker { ...current } key={ current.athlete.id } />
+        scoreCheck = <ScoreChecker { ...current } key={ current.athlete.id } onScoreSaved={ onScoreSaved } />
     }
 
     let nextStep = null;
     if (toVerify && toVerify.length) {
         nextStep = <>
-            <h4>Progress: { toVerify.length } submissions to verify</h4>
+            <h4>Progress: { count } submissions to verify</h4>
             <input type="submit" value={ "Next: " + next.name } onClick={ onLoadAthlete(next.id) } disabled={ loadingAthlete } />
         </>;
     }

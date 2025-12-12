@@ -240,7 +240,13 @@ class ContactResponseAdmin(admin.ModelAdmin):
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ["athlete_season__athlete", "submitted"]
+    list_display = ["athlete_season__athlete", "submitted", "processed"]
+    search_fields = [
+        "athlete_season__athlete__forename",
+        "athlete_season__athlete__forename",
+        "athlete_season__athlete__agb_number",
+    ]
+    readonly_fields = ["processed"]
 
 
 admin.site.register(Season)
