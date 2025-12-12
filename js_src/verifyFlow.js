@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import Cookies from 'cookies-js';
+
 import useLoadData from './hooks/useLoadData';
 import Card from './layout/Card';
 
@@ -46,6 +48,7 @@ const ScoreRow = ({ score, accept, onChange }) => {
 
 const ScoreChecker = ({ athlete, scores, newScores }) => {
     const [toSave, setToSave] = useState({});
+    const [saved, setSaved] = useState(false);
 
     const allScores = [...scores, ...newScores].sort((s1, s2) => s1.handicap - s2.handicap);
 
@@ -66,8 +69,33 @@ const ScoreChecker = ({ athlete, scores, newScores }) => {
         </>;
     }
 
+    const save = (e) => {
+        e.preventDefault();
+        var url = new URL('/api/verify-scores/', window.location.href);
+        const data = { scores: Object.entries(toSave).map(row => { return { id: row[0], accept: row[1] } }),  id: athlete.id };
+        const csrf = Cookies.get('csrftoken');
+        fetch(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf,
+            },
+            redirect: 'follow',
+        }).then((response) => {
+            if (response.status !== 200) {
+                console.error("Something went wrong");
+                window.scrollTo({top: 0});
+                return;
+            }
+            setSaved(true);
+        });
+    }
+
     const acceptedLength = Object.keys(toSave).length;
-    console.log(acceptedLength, newScores.length);
     return <>
         <h4>{ athlete.name }</h4>
         <dl>
@@ -78,7 +106,7 @@ const ScoreChecker = ({ athlete, scores, newScores }) => {
             <dt>Submitted scores</dt> <dd>{ newScores.length }</dd>
         </dl>
         { scoreSection }
-        { acceptedLength === newScores.length && <input type="submit" value="Save scores" /> }
+        { acceptedLength === newScores.length && <input type="submit" value={ saved ? "Saved" : "Save scores" } onClick={ save } disabled={ saved } /> }
     </>;
 };
 
@@ -127,8 +155,7 @@ const VerifyFlow = () => {
     let nextStep = null;
     if (toVerify && toVerify.length) {
         nextStep = <>
-            <h4>Progress</h4>
-            <p>There are { toVerify.length } submissions left to verify.</p>
+            <h4>Progress: { toVerify.length } submissions to verify</h4>
             <input type="submit" value={ "Next: " + next.name } onClick={ onLoadAthlete(next.id) } disabled={ loadingAthlete } />
         </>;
     }

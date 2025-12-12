@@ -1,6 +1,7 @@
 import json
 
 from django.http.response import JsonResponse
+from django.utils import timezone
 from django.views.generic import TemplateView, View
 
 from archeryutils.handicaps import handicap_from_score
@@ -191,21 +192,23 @@ class Contact(CsrfExemptMixin, View):
 
 class ScoresToVerify(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        submissions = Submission.objects.select_related(
-            "athlete_season", "athlete_season__athlete"
-        ).prefetch_related(
-            "submissionscore_set",
-            "submissionscore_set__event",
-            "athlete_season__score_set",
-            "athlete_season__score_set__event",
+        submissions = (
+            Submission.objects.filter(
+                processed__isnull=True,
+            )
+            .select_related("athlete_season", "athlete_season__athlete")
+            .prefetch_related(
+                "submissionscore_set",
+                "submissionscore_set__event",
+                "athlete_season__score_set",
+                "athlete_season__score_set__event",
+            )
         )
 
         data = {}
         for sub in submissions:
             athlete_season = sub.athlete_season
             athlete = athlete_season.athlete
-            # scores = sorted(athlete_season.score_set.all(), key=lambda s: s.handicap)
-            # new_scores = sorted(sub.submissionscore_set.all(), key=lambda s: s.handicap)
             if athlete_season.id not in data:
                 data[athlete_season.id] = {
                     "id": athlete_season.id,
@@ -227,7 +230,9 @@ class SubmissionDetails(LoginRequiredMixin, View):
         try:
             season = AthleteSeason.objects.get(pk=request.GET["id"])
         except (AthleteSeason.DoesNotExist, KeyError):
-            return JsonResponse({"status": "error", "message": "Season not found"}, status=404)
+            return JsonResponse(
+                {"status": "error", "message": "Season not found"}, status=404
+            )
         scores = [
             {
                 "id": "checked:%s" % score.id,
@@ -259,3 +264,27 @@ class SubmissionDetails(LoginRequiredMixin, View):
         ]
 
         return JsonResponse({"status": "ok", "scores": scores, "newScores": new_scores})
+
+
+class VerifyScores(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        for score in data["scores"]:
+            submission_score = SubmissionScore.objects.get(id=score["id"])
+            submission = submission_score.submission
+            athlete_season = submission.athlete_season
+            if score["accept"]:
+                submission_score.accepted = timezone.now()
+                athlete_season.score_set.create(
+                    event=submission_score.event,
+                    shot_round=submission_score.shot_round,
+                    score=submission_score.score,
+                )
+            else:
+                submission_score.rejected = timezone.now()
+            submission.processed = timezone.now()
+            submission.save()
+            submission_score.save()
+        if not data["scores"]:
+            Submission.objects.filter(athlete_season_id=data["id"]).update(processed=timezone.now())
+        return JsonResponse({"status": "ok"})

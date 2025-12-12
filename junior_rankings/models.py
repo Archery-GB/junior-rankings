@@ -108,17 +108,19 @@ class Score(models.Model):
 class Submission(models.Model):
     athlete_season = models.ForeignKey(AthleteSeason, on_delete=models.PROTECT)
     submitted = models.DateTimeField(auto_now_add=True)
+    processed = models.DateField(blank=True, null=True, editable=False)
 
     def __str__(self):
         return "Submission for %s" % self.athlete_season
 
 
 class SubmissionScore(models.Model):
-    # Additional scores submitted by the user
     submission = models.ForeignKey(Submission, on_delete=models.PROTECT)
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
     shot_round = RoundField(rounds=all_available_rounds)
     score = models.PositiveIntegerField()
+    accepted = models.DateField(blank=True, null=True, editable=False)
+    rejected = models.DateField(blank=True, null=True, editable=False)
 
     @property
     def handicap(self):
