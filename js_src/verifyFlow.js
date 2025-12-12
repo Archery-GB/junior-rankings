@@ -163,8 +163,10 @@ const VerifyFlow = () => {
     if (toVerify && toVerify.length) {
         nextStep = <>
             <h4>Progress: { count } submissions to verify</h4>
-            <input type="submit" value={ "Next: " + next.name } onClick={ onLoadAthlete(next.id) } disabled={ loadingAthlete } />
+            { next && <input type="submit" value={ "Next: " + next.name } onClick={ onLoadAthlete(next.id) } disabled={ loadingAthlete } /> }
         </>;
+    } else if (toVerify) {
+        nextStep = <h4>All done!</h4>;
     }
 
     return (
