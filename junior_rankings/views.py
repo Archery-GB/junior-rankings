@@ -282,11 +282,6 @@ class VerifyScores(LoginRequiredMixin, View):
                 )
             else:
                 submission_score.rejected = timezone.now()
-            submission.processed = timezone.now()
-            submission.save()
             submission_score.save()
-        if not data["scores"]:
-            Submission.objects.filter(athlete_season_id=data["id"]).update(
-                processed=timezone.now()
-            )
+        Submission.objects.filter(athlete_season_id=data["id"]).update(processed=timezone.now())
         return JsonResponse({"status": "ok"})
