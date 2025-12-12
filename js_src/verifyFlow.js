@@ -92,6 +92,7 @@ const ScoreChecker = ({ athlete, scores, newScores, onScoreSaved }) => {
                 return;
             }
             setSaved(true);
+            onScoreSaved();
         });
     }
 
