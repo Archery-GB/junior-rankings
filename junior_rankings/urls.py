@@ -5,6 +5,15 @@ from . import views
 
 urlpatterns = [
     path("", views.Root.as_view(), name="root"),
+    path("rankings/", views.Rankings.as_view(), name="rankings"),
+    path(
+        "rankings/u<int:age><slug:division>/",
+        views.Rankings.as_view(),
+        name="age_division_rankings",
+    ),
+    path(
+        "rankings/<slug:division>/", views.Rankings.as_view(), name="division_rankings"
+    ),
     path("verify/", views.Verify.as_view(), name="verify"),
     path(
         "api/athlete-details/", views.AthleteDetails.as_view(), name="athlete-details"

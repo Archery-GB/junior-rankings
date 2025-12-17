@@ -13,10 +13,13 @@
     </head>
     <body>
         <header>
-            <h3>Archery GB</h3>
-            <div><a href="https://archerygb.org/competitions/national-rankings">All national rankings</a></div>
+            <h3 class="header-logo">Archery GB</h3>
+            {% if user.is_authenticated %}
+            <div><a href="{% url "rankings" %}">2025 Junior Rankings</a></div>
+            {% endif %}
+            <div><a href="https://archerygb.org/competitions/national-rankings">National rankings home</a></div>
         </header>
-        <div class="container">
+        <div class="container {% block container_class %}{% endblock %}">
             {% block content %}
             {% endblock %}
         </div>

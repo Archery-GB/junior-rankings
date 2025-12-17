@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% load render_bundle from webpack_loader %}
+
+{% block container_class %}wide{% endblock %}
+
+{% block content %}
+<h1 class="m-no-bottom">Archery GB</h1>
+<h2 class="m-no-top">2025 Junior Rankings</h2>
+
+{% if rankings.0.is_division %}
+<p class="backlink">
+<a class="backlink-link" href="{% url "rankings" %}">All bows</a>
+</p>
+{% endif %}
+
+<div class="multicard">
+    {% for division in rankings %}
+    <div class="card">
+        <h4>{{ division.name }}</h4>
+
+        {% if division.ranked %}
+            <div class="ranking-list">
+            {% for season in division.ranked %}
+            <span class="rank">
+                {% if division.is_age %}
+                {{ season.age_group_rank_display }}
+                {% else %}
+                {{ season.overall_rank_display }}
+                {% endif %}
+            </span>
+            <span class="name">{{ season.athlete }}</span>
+            <span class="age">{{ season.age_group_short }}</span>
+            <span class="hc">{{ season.agg_handicap }}</span>
+            {% endfor %}
+            </div>
+        {% else %}
+        <p>No athletes ranked</p>
+        {% endif %}
+
+        {% if division.is_top and division.ranked %}
+            <a class="button" href="{% url "division_rankings" division=division.code %}">View all</a>
+        {% elif division.is_age %}
+            <a class="button" href="{% url "division_rankings" division=division.code %}">Combined ages</a>
+        {% endif %}
+
+        {% if division.ranked or division.is_age %}
+        <div class="button-row">
+            {% for age in ages %}
+            <a class="button" href="{% url "age_division_rankings" division=division.code age=age %}">U{{ age }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

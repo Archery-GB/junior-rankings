@@ -228,8 +228,16 @@ class ScoreAdmin(admin.ModelAdmin):
 
 @admin.register(AthleteSeason)
 class AthleteSeasonAdmin(admin.ModelAdmin):
-    list_display = ["athlete", "season", "age_group", "bowstyle"]
-    list_filter = ["season", "bowstyle", "age_group"]
+    list_display = [
+        "athlete",
+        "season",
+        "age_group",
+        "bowstyle",
+        "agg_handicap",
+        "overall_rank_display",
+        "age_group_rank_display",
+    ]
+    list_filter = ["season", "athlete__gender", "bowstyle", "age_group"]
     search_fields = ["athlete__forename", "athlete__surname", "athlete__agb_number"]
 
 

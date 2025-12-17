@@ -31,6 +31,14 @@ header h3 {
     color: var(--red);
     margin: 0;
     font-size: 21px;
+    background: url(/static/img/archery-gb-logo-red-chopped.svg);
+    background-size: 161px;
+    width: 161px;
+    text-indent: -10000px;
+    color: white;
+    height: 57px;
+    position: relative;
+    top: -10px;
 }
 header a {
     color: var(--blue);
@@ -45,6 +53,9 @@ header a:hover {
     margin: 0 auto;
     max-width: 680px;
     padding: 0 15px;
+}
+.container.wide {
+    max-width: 850px;
 }
 
 h1, h2, h3 {
@@ -139,24 +150,49 @@ hr {
     border-top: 1px solid var(--text-grey);
 }
 
+.button,
 button {
     color: white;
     background-color: var(--red);
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    display: block;
+    padding: 5px 8px;
+    margin: 1em auto;
+    width: 150px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid var(--red);
 }
+.button:hover {
+    text-decoration: none;
+    color: var(--red);
+    background-color: white;
+}
+.button[disabled],
 button[disabled] {
     background: var(--text-grey);
     color: white;
     cursor: not-allowed;
 }
+.button.small,
 button.small {
     font-size: 13px;
     padding: 3px 7px;
 }
+.button.active
 button.active {
     background: var(--blue);
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-around;
+}
+.button-row .button {
+    width: auto;
+    margin: 0 5px;
 }
 
 .card {
@@ -173,6 +209,18 @@ button.active {
 .card > :last-child {
     margin-bottom: 0;
 }
+
+.multicard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+.multicard .card {
+    width: auto;
+    min-width: 390px;
+    margin: 10px 0;
+}
+
 .card label {
     font-size: 17px;
     margin: 0.5em 0;
@@ -243,4 +291,25 @@ button.active {
 .card input.standout {
     margin: 1.5em auto;
     max-width: 300px;
+}
+
+.ranking-list {
+    margin: 1em 0;
+    display: grid;
+    grid-template-columns: 35px auto 40px 30px;
+    grid-gap: 1px 3px;
+}
+.ranking-list .rank {
+    font-weight: bold;
+}
+.ranking-list .hc {
+    text-align: right;
+}
+
+.backlink {
+    text-align: center;
+    font-size: 18px;
+}
+.backlink-link {
+    color: white;
 }

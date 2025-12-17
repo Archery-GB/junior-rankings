@@ -1,9 +1,11 @@
+import itertools
 import json
 
 from django.http.response import JsonResponse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 
+from archerydjango.fields import DbAges, DbBowstyles, DbGender
 from archeryutils.handicaps import handicap_from_score
 from braces.views import CsrfExemptMixin, LoginRequiredMixin
 
@@ -22,6 +24,58 @@ class Root(TemplateView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(page_name="root", **kwargs)
+
+
+class Rankings(LoginRequiredMixin, TemplateView):
+    template_name = "junior_rankings/rankings.html"
+
+    def get_context_data(self, **kwargs):
+        divisions = itertools.product(DbBowstyles, DbGender)
+
+        rankings = []
+        if self.kwargs.get("division"):
+            division = self.kwargs["division"]
+            bowstyle = DbBowstyles.__lookup__[division[0].upper()]
+            gender = DbGender.__lookup__[division[1].upper()]
+            rankings.append(
+                {
+                    "name": "%s %s" % (bowstyle, gender),
+                    "code": division,
+                    "ranked": AthleteSeason.objects.filter(
+                        overall_rank__isnull=False,
+                        athlete__gender=gender,
+                        bowstyle=bowstyle,
+                    ).order_by("overall_rank", "athlete__surname"),
+                    "is_division": True,
+                }
+            )
+
+            if self.kwargs.get("age"):
+                age = DbAges.__lookup__["U%s" % self.kwargs["age"]]
+                rankings[-1]["ranked"] = rankings[-1]["ranked"].filter(
+                    age_group=age,
+                )
+                rankings[-1]["name"] = "%s %s %s" % (age, bowstyle, gender)
+                rankings[-1]["is_age"] = True
+        else:
+            for bowstyle, gender in divisions:
+                rankings.append(
+                    {
+                        "name": "%s %s" % (bowstyle, gender),
+                        "code": ("%s%s" % (str(bowstyle)[0], str(gender)[0])).lower(),
+                        "ranked": AthleteSeason.objects.filter(
+                            overall_rank__lte=3,
+                            athlete__gender=gender,
+                            bowstyle=bowstyle,
+                        ).order_by("overall_rank", "athlete__surname"),
+                        "is_top": True,
+                    }
+                )
+
+        ages = [str(age)[-2:] for age in list(DbAges)[2:]]
+        return super().get_context_data(
+            page_name="rankings", rankings=rankings, ages=ages, **kwargs
+        )
 
 
 class Verify(LoginRequiredMixin, TemplateView):
@@ -283,5 +337,7 @@ class VerifyScores(LoginRequiredMixin, View):
             else:
                 submission_score.rejected = timezone.now()
             submission_score.save()
-        Submission.objects.filter(athlete_season_id=data["id"]).update(processed=timezone.now())
+        Submission.objects.filter(athlete_season_id=data["id"]).update(
+            processed=timezone.now()
+        )
         return JsonResponse({"status": "ok"})

@@ -55,9 +55,39 @@ class AthleteSeason(models.Model):
     age_group = AgeField()
     bowstyle = BowstyleField()
 
-    # Rank
-    # Rank is equal
-    # Aggregate handicap
+    overall_rank = models.PositiveIntegerField(blank=True, null=True)
+    overall_rank_is_equal = models.BooleanField(default=False)
+    age_group_rank = models.PositiveIntegerField(blank=True, null=True)
+    age_group_rank_is_equal = models.BooleanField(default=False)
+    agg_handicap = models.IntegerField(blank=True, null=True)
+
+    def set_agg_handicap(self):
+        scores = self.score_set.all()
+        if len(scores) < 3:
+            self.agg_handicap = None
+            return
+        self.agg_handicap = int(sum(sorted(map(lambda s: s.handicap, scores))[:3]))
+
+    @property
+    def overall_rank_display(self):
+        if not self.overall_rank:
+            return "-"
+        if self.overall_rank_is_equal:
+            return "%s=" % self.overall_rank
+        else:
+            return self.overall_rank
+
+    @property
+    def age_group_rank_display(self):
+        if not self.age_group_rank:
+            return "-"
+        if self.age_group_rank_is_equal:
+            return "%s=" % self.age_group_rank
+        else:
+            return self.age_group_rank
+
+    def age_group_short(self):
+        return "U%s" % str(self.age_group)[-2:]
 
     def __str__(self):
         return "%s in %s" % (self.athlete, self.season)
