@@ -4,8 +4,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.Root.as_view(), name="root"),
-    path("rankings/", views.Rankings.as_view(), name="rankings"),
+    # path("", views.Root.as_view(), name="root"),
+    path("", views.Rankings.as_view(), name="rankings"),
     path(
         "rankings/u<int:age><slug:division>/",
         views.Rankings.as_view(),
