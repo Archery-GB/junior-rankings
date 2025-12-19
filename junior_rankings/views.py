@@ -26,7 +26,7 @@ class Root(TemplateView):
         return super().get_context_data(page_name="root", **kwargs)
 
 
-class Rankings(LoginRequiredMixin, TemplateView):
+class Rankings(TemplateView):
     template_name = "junior_rankings/rankings.html"
 
     def get_context_data(self, **kwargs):
