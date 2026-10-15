@@ -1,6 +1,7 @@
 import itertools
 import json
 
+from django.http import Http404
 from django.http.response import JsonResponse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
@@ -14,22 +15,58 @@ from .models import (
     AthleteSeason,
     ContactResponse,
     Event,
+    Season,
     Submission,
     SubmissionScore,
 )
 
 
-class SubmitScores(LoginRequiredMixin, TemplateView):
+class SeasonMixin:
+    status = None
+
+    def get_season(self):
+        season = None
+        if self.kwargs.get("year"):
+            season = Season.objects.get(year=self.kwargs["year"])
+        elif self.status:
+            season = Season.objects.filter(status=self.status).order_by("-year").first()
+        if not season and self.request.user.is_authenticated:
+            season = (
+                Season.objects.filter(status=Season.Status.TESTING)
+                .order_by("-year")
+                .first()
+            )
+
+        if not season:
+            raise Http404("No season found.")
+        if (
+            self.status
+            and not season.status == self.status
+            and not self.request.user.is_authenticated
+        ):
+            raise Http404(
+                "Accessing a season page when not logged in and in the wrong phase."
+            )
+
+        return season
+
+
+class SubmitScores(SeasonMixin, TemplateView):
     template_name = "junior_rankings/submit.html"
+    status = Season.Status.SUBMITTING
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(page_name="submit", **kwargs)
+        return super().get_context_data(
+            page_name="submit", season=self.get_season(), **kwargs
+        )
 
 
-class Rankings(TemplateView):
+class Rankings(SeasonMixin, TemplateView):
     template_name = "junior_rankings/rankings.html"
+    status = Season.Status.PUBLISHED
 
     def get_context_data(self, **kwargs):
+        season = self.get_season()
         divisions = itertools.product(DbBowstyles, DbGender)
 
         rankings = []
@@ -45,6 +82,7 @@ class Rankings(TemplateView):
                         overall_rank__isnull=False,
                         athlete__gender=gender,
                         bowstyle=bowstyle,
+                        season=season,
                     ).order_by("overall_rank", "athlete__surname"),
                     "is_division": True,
                 }
@@ -64,6 +102,7 @@ class Rankings(TemplateView):
                         "name": "%s %s" % (bowstyle, gender),
                         "code": ("%s%s" % (str(bowstyle)[0], str(gender)[0])).lower(),
                         "ranked": AthleteSeason.objects.filter(
+                            season=season,
                             overall_rank__lte=3,
                             athlete__gender=gender,
                             bowstyle=bowstyle,
@@ -74,12 +113,13 @@ class Rankings(TemplateView):
 
         ages = [str(age)[-2:] for age in list(DbAges)[2:]]
         return super().get_context_data(
-            page_name="rankings", rankings=rankings, ages=ages, **kwargs
+            page_name="rankings", rankings=rankings, ages=ages, season=season, **kwargs
         )
 
 
-class Verify(LoginRequiredMixin, TemplateView):
+class Verify(SeasonMixin, LoginRequiredMixin, TemplateView):
     template_name = "junior_rankings/verify.html"
+    status = Season.Status.SUBMITTING
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(page_name="verify", **kwargs)
@@ -100,9 +140,12 @@ class AthleteSeasonByAgbNo(object):
     def load_athlete_season(self):
         if "agb_number" not in self.request.GET:
             raise ResponseException("Missing parameter: agb_number", 400)
+        if "year" not in self.request.GET:
+            raise ResponseException("Missing parameter: year", 400)
         try:
             athlete_season = AthleteSeason.objects.get(
-                season__year=2025, athlete__agb_number=self.request.GET["agb_number"]
+                season__year=self.request.GET["year"],
+                athlete__agb_number=self.request.GET["agb_number"],
             )
         except AthleteSeason.DoesNotExist:
             raise ResponseException("Athlete not found", 404)
@@ -158,8 +201,10 @@ class AvailableEvents(AthleteSeasonByAgbNo, View):
             athlete_season = self.load_athlete_season()
         except ResponseException as e:
             return e.response
-        events = Event.objects.exclude(score__athlete_season=athlete_season).order_by(
-            "date"
+        events = (
+            Event.objects.filter(date__year=athlete_season.season.year)
+            .exclude(score__athlete_season=athlete_season)
+            .order_by("date")
         )
         return JsonResponse(
             {
@@ -219,7 +264,7 @@ class Submit(CsrfExemptMixin, View):
         # FIXME This will break if anyone has double bow styles but there aren't any (yet!)
         athlete_season = AthleteSeason.objects.get(
             athlete__agb_number=data["agbNo"],
-            season__year=2025,
+            season__year=data["year"],
         )
         submission = Submission.objects.create(athlete_season=athlete_season)
         for score in data["scores"]:

@@ -3,17 +3,25 @@ import itertools
 from django.core.management.base import BaseCommand
 
 from archerydjango.fields import DbAges, DbBowstyles, DbGender
-from junior_rankings.models import AthleteSeason
+from junior_rankings.models import AthleteSeason, Season
 
 
 class Command(BaseCommand):
     help = "Re rank all athletes"
 
+    def add_arguments(self, parser):
+        parser.add_argument("year", type=int)
+
     def handle(self, *args, **options):
+        year = Season.objects.get(year=options["year"])
+
         for bow, gender in itertools.product(DbBowstyles, DbGender):
             self.stdout.write("Ranking %s %s" % (bow, gender))
             seasons = AthleteSeason.objects.filter(
-                bowstyle=bow, athlete__gender=gender, agg_handicap__isnull=False
+                bowstyle=bow,
+                athlete__gender=gender,
+                agg_handicap__isnull=False,
+                season=year,
             ).order_by("agg_handicap")
             self.stdout.write("%s athletes" % seasons.count())
 
@@ -44,6 +52,7 @@ class Command(BaseCommand):
                 age_group=age,
                 athlete__gender=gender,
                 agg_handicap__isnull=False,
+                season=year,
             ).order_by("agg_handicap")
             self.stdout.write("%s athletes" % seasons.count())
 

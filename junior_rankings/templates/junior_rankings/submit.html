@@ -4,9 +4,9 @@
 
 {% block content %}
 <h1 class="m-no-bottom">Archery GB</h1>
-<h2 class="m-no-top">2026 Junior Rankings</h2>
+<h2 class="m-no-top">{{ season.year }} Junior Rankings</h2>
  
-<div id="app-submission-form">
+<div id="app-submission-form" data-year="{{ season.year }}">
 </div>
 {% endblock %}
 

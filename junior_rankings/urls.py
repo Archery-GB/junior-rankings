@@ -5,17 +5,19 @@ from . import views
 
 urlpatterns = [
     path("", views.Rankings.as_view(), name="rankings"),
+    path("rankings/<int:year>/", views.Rankings.as_view(), name="rankings"),
     path(
-        "rankings/u<int:age><slug:division>/",
+        "rankings/<int:year>/u<int:age><slug:division>/",
         views.Rankings.as_view(),
         name="age_division_rankings",
     ),
     path(
-        "rankings/<slug:division>/", views.Rankings.as_view(), name="division_rankings"
+        "rankings/<int:year>/<slug:division>/",
+        views.Rankings.as_view(),
+        name="division_rankings",
     ),
     path("submit/", views.SubmitScores.as_view(), name="submit"),
     path("verify/", views.Verify.as_view(), name="verify"),
-
     path(
         "api/athlete-details/", views.AthleteDetails.as_view(), name="athlete-details"
     ),
@@ -37,6 +39,5 @@ urlpatterns = [
         name="submission-details",
     ),
     path("api/verify-scores/", views.VerifyScores.as_view(), name="verify-scores"),
-
     path("admin/", admin.site.urls),
 ]

@@ -7,13 +7,13 @@ import useLoadData from './hooks/useLoadData';
 import Card from './layout/Card';
 
 
-const Intro = ({ onComplete, toContact }) => {
+const Intro = ({ year, onComplete, toContact }) => {
     const [agbNo, setAgbNo] = useState('');
     const { error, loading, load } = useLoadData('athlete-details')
 
     const submit = (e) => {
         e.preventDefault();
-        load({ agb_number: agbNo }).then((data) => {
+        load({ agb_number: agbNo, year }).then((data) => {
             if (data.error) {
                 data.agbNo = agbNo;
                 return;
@@ -40,7 +40,7 @@ const Intro = ({ onComplete, toContact }) => {
 };
 
 
-const Step1 = ({ athlete, onComplete, toContact }) => {
+const Step1 = ({ athlete, year, onComplete, toContact }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -48,7 +48,7 @@ const Step1 = ({ athlete, onComplete, toContact }) => {
         e.preventDefault();
         setLoading(true);
         var url = new URL('/api/athlete-scores/', window.location.href);
-        var params = { agb_number: athlete.agbNo };
+        var params = { agb_number: athlete.agbNo, year };
         url.search = new URLSearchParams(params).toString();
         fetch(url).then((response) => response.json()).then((data) => {
             setLoading(false);
@@ -106,7 +106,7 @@ const ScoreRow = ({ score }) => {
 };
 
 
-const Step2 = ({ athlete, scores, toContact, onComplete, submitFinal }) => {
+const Step2 = ({ athlete, year, scores, toContact, onComplete, submitFinal }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -123,7 +123,7 @@ const Step2 = ({ athlete, scores, toContact, onComplete, submitFinal }) => {
         e.preventDefault();
         setLoading(true);
         var url = new URL('/api/available-events/', window.location.href);
-        var params = { agb_number: athlete.agbNo };
+        var params = { agb_number: athlete.agbNo, year };
         url.search = new URLSearchParams(params).toString();
         fetch(url).then((response) => response.json()).then((data) => {
             setLoading(false);
@@ -169,7 +169,7 @@ const Step2 = ({ athlete, scores, toContact, onComplete, submitFinal }) => {
 };
 
 
-const Step3 = ({ events, scores, addScore, toContact, onComplete, submitFinal }) => {
+const Step3 = ({ events, scores, addScore, toContact, onComplete, submitFinal, year }) => {
     const [addedScores, setAddedScores] = useState([]);
     const [currentEvent, setCurrentEvent] = useState("");
     const [currentRound, setCurrentRound] = useState("");
@@ -264,7 +264,7 @@ const Step3 = ({ events, scores, addScore, toContact, onComplete, submitFinal })
         <>
             <h4>Step 3: Add additional scores</h4>
             <p>
-            Scores must have been shot during 2025 at a World or UK Record status
+            Scores must have been shot during { year } at a World or UK Record status
             competition, and they must have been on a qualifying round for your age
             group and division.
             </p>
@@ -364,7 +364,7 @@ const Contact = ({ onComplete }) => {
     return (
         <>
             <h4>Something not quite right?</h4>
-            <p>This site is new for 2025 and has been developed by volunteers for the benefit of Archery GB. It probably doesn't cover every situation perfectly yet.</p>
+            <p>This site is still relatively new and has been developed by volunteers for the benefit of Archery GB. It probably doesn't cover every situation perfectly yet.</p>
             <p>If you've got a problem, please complete the below form and we will get back to you as soon as we can.</p>
             <hr />
             { !complete && <form onSubmit={ onSubmit }>
@@ -390,7 +390,7 @@ const Contact = ({ onComplete }) => {
 };
 
 
-const SubmissionFormManager = () => {
+const SubmissionFormManager = ({ year }) => {
     const [step, setStep] = useState(0);
     const [params, setParams] = useState({});
 
@@ -447,7 +447,7 @@ const SubmissionFormManager = () => {
     const submitFinal = (e) => {
         e.preventDefault();
         var url = new URL('/api/submit/', window.location.href);
-        const data = { agbNo: params.athlete.agbNo, scores: params.scores.filter((s) => s.tempId).map((s) => {
+        const data = { agbNo: params.athlete.agbNo, year, scores: params.scores.filter((s) => s.tempId).map((s) => {
             return {
                 score: s.score,
                 round: s.roundCodename,
@@ -486,7 +486,7 @@ const SubmissionFormManager = () => {
 
     return (
         <Card>
-            <Current onComplete={ nextStep } toContact={ toContact } addScore={ addScore } submitFinal={ submitFinal } { ...params } />
+            <Current onComplete={ nextStep } toContact={ toContact } addScore={ addScore } submitFinal={ submitFinal } year={ year } { ...params } />
         </Card>
     );
 };
@@ -495,5 +495,5 @@ const submissionFormApp = document.getElementById('app-submission-form');
 
 if (submissionFormApp) {
     const root = createRoot(submissionFormApp);
-    root.render(<SubmissionFormManager />);
+    root.render(<SubmissionFormManager year={ submissionFormApp.dataset.year }/>);
 }

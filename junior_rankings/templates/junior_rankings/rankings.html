@@ -6,11 +6,11 @@
 
 {% block content %}
 <h1 class="m-no-bottom">Archery GB</h1>
-<h2 class="m-no-top">2025 Junior Rankings</h2>
+<h2 class="m-no-top">{{ season.year }} Junior Rankings</h2>
 
 {% if rankings.0.is_division %}
 <p class="backlink">
-<a class="backlink-link" href="{% url "rankings" %}">< Summary</a>
+<a class="backlink-link" href="{% url "rankings" year=season.year %}">< Summary</a>
 </p>
 {% endif %}
 
@@ -39,15 +39,15 @@
         {% endif %}
 
         {% if division.is_top and division.ranked %}
-            <a class="button" href="{% url "division_rankings" division=division.code %}">View all</a>
+            <a class="button" href="{% url "division_rankings" year=season.year division=division.code %}">View all</a>
         {% elif division.is_age %}
-            <a class="button" href="{% url "division_rankings" division=division.code %}">Combined ages</a>
+            <a class="button" href="{% url "division_rankings" year=season.year division=division.code %}">Combined ages</a>
         {% endif %}
 
         {% if division.ranked or division.is_age %}
         <div class="button-row">
             {% for age in ages %}
-            <a class="button" href="{% url "age_division_rankings" division=division.code age=age %}">U{{ age }}</a>
+            <a class="button" href="{% url "age_division_rankings" year=season.year division=division.code age=age %}">U{{ age }}</a>
             {% endfor %}
         </div>
         {% endif %}

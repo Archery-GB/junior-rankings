@@ -14,12 +14,18 @@ from .allowed_rounds import all_available_rounds
 
 
 class Season(models.Model):
+    class Status(models.TextChoices):
+        TESTING = "testing", "Testing phase"
+        SUBMITTING = "submitting", "Submission & Verification phase"
+        PUBLISHED = "published", "Rankings published phase"
+
     year = models.PositiveIntegerField(
         validators=[
             validators.MinValueValidator(2000),
             validators.MaxValueValidator(2100),
         ]
     )
+    status = models.CharField(choices=Status)
 
     def __str__(self):
         return "%s season" % self.year
