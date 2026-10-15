@@ -120,12 +120,12 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
 
             athlete_data["age_group"] = get_age_group(athlete.year, obj.date.year)
             if athlete_data["age_group"] in [
-                DbAges.AGE_UNDER_21,
-                DbAges.AGE_UNDER_18,
-                DbAges.AGE_UNDER_16,
-                DbAges.AGE_UNDER_15,
-                DbAges.AGE_UNDER_14,
-                DbAges.AGE_UNDER_12,
+                DbAges.UNDER_21,
+                DbAges.UNDER_18,
+                DbAges.UNDER_16,
+                DbAges.UNDER_15,
+                DbAges.UNDER_14,
+                DbAges.UNDER_12,
             ]:
                 athlete.save()
             else:
@@ -152,7 +152,7 @@ class EventAdmin(DjangoObjectActions, admin.ModelAdmin):
                     competed_age_group
                 ]
             except KeyError:
-                athlete_data["competed_age_group"] = DbAges.AGE_UNDER_21
+                athlete_data["competed_age_group"] = DbAges.UNDER_21
 
             if not obj.round_age_rules:
                 athlete_data["shot_round"] = get_allowed_rounds(
